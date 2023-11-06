@@ -1,0 +1,16 @@
+{
+  "name": "<vendor>/<project>>",
+  "description": "<description>",
+  "license": "<licence>",
+  "type": "oxideshop-module",
+  "extra": {
+    "oxideshop": {
+      "target-directory": "<vendor>/<project>"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "<Vendor>\\<project>\\": "./"
+    }
+  }
+}
