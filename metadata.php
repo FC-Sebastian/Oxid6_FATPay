@@ -9,17 +9,17 @@ $sMetadataVersion = '2.1';
  * Module information
  */
 $aModule = [
-    'id'          => '',
+    'id'          => 'fcfatpay',
     'title'       => [
-        'de' => '',
-        'en' => ''
+        'de' => 'FATPay-Zahlungsmodul',
+        'en' => 'FATPay payment module'
     ],
     'description' => [
-        'de' => '',
-        'en' => ''
+        'de' => 'Ein Modul welches Zahlung mit FATPay ermöglicht',
+        'en' => 'A module which enables paying with FATPay'
     ],
-    'version'     => '',
-    'author'      => '',
+    'version'     => '1.0',
+    'author'      => 'FC-Sebastian',
     'blocks'      => [
         [
             'template' => '',
@@ -27,10 +27,10 @@ $aModule = [
             'file'     => ''
         ],
     ],
-    'extend' => [
+    'extend'      => [
     ],
     'controllers' => [
     ],
-    'templates' => [
+    'templates'   => [
     ]
 ];
