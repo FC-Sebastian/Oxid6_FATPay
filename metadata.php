@@ -32,6 +32,7 @@ $aModule = [
         'onDeactivate' => 'Fatchip\FATPay\Core\ModuleEvents::onDeactivate'
     ],
     'extend'      => [
+        \OxidEsales\Eshop\Application\Model\Payment::class => \Fatchip\extend\Application\Model\Payment::class
     ],
     'controllers' => [
     ],
