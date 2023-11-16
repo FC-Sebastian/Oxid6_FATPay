@@ -1,6 +1,6 @@
 <?php
 
-namespace Fatchip\FATPay\Core\ModuleEvents;
+namespace Fatchip\FATPay\Core;
 
 class ModuleEvents
 {

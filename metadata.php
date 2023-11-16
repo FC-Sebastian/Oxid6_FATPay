@@ -28,12 +28,15 @@ $aModule = [
         ],
     ],
     'events'      => [
-        'onActivate' => '\Fatchip\FATPay\Core\ModuleEvents::onActivate'
+        'onActivate' => 'Fatchip\FATPay\Core\ModuleEvents::onActivate'
     ],
     'extend'      => [
     ],
     'controllers' => [
     ],
     'templates'   => [
+    ],
+    'settings'    => [
+        ['name' => 'sFcApiUrl', 'type' => 'str', 'value' => '']
     ]
 ];
