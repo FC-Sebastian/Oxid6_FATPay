@@ -27,6 +27,9 @@ $aModule = [
             'file'     => ''
         ],
     ],
+    'events'      => [
+        'onActivate' => '\Fatchip\FATPay\Core\ModuleEvents::onActivated'
+    ],
     'extend'      => [
     ],
     'controllers' => [
