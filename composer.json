@@ -5,7 +5,7 @@
   "type": "oxideshop-module",
   "autoload": {
     "psr-4": {
-      "Fatchip\\FATPay\\": "./"
+      "Fatchip\\FATPay\\": "./Application"
     }
   }
 }
