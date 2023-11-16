@@ -28,7 +28,8 @@ $aModule = [
         ],
     ],
     'events'      => [
-        'onActivate' => 'Fatchip\FATPay\Core\ModuleEvents::onActivate'
+        'onActivate' => 'Fatchip\FATPay\Core\ModuleEvents::onActivate',
+        'onDeactivate' => 'Fatchip\FATPay\Core\ModuleEvents::onDeactivate'
     ],
     'extend'      => [
     ],
