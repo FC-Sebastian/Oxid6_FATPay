@@ -37,6 +37,6 @@ $aModule = [
     'templates'   => [
     ],
     'settings'    => [
-        ['name' => 'sFcApiUrl', 'type' => 'str', 'value' => '']
+        ['group' => 'main', 'name' => 'sFcApiUrl', 'type' => 'str', 'value' => '']
     ]
 ];
