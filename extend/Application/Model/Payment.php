@@ -24,4 +24,26 @@ class Payment extends Payment_parent
 
         return !empty($oResult->fetchOne());
     }
+
+    public function fcSetFatPayActive()
+    {
+        $this->load('fatpay');
+        $this->oxpayments__oxactive = new \OxidEsales\Eshop\Core\Field(1);
+        $this->save();
+    }
+
+    public function fcSetFatPayInActive()
+    {
+        $this->load('fatpay');
+        $this->oxpayments__oxactive = new \OxidEsales\Eshop\Core\Field(0);
+        $this->save();
+    }
+
+    public function fcCreateFatPayPayment()
+    {
+        $this->setId('fatpay');
+        $this->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FAT-Pay');
+        $this->oxpayments__oxtoamount = new \OxidEsales\Eshop\Core\Field(1000000);
+        $this->save();
+    }
 }
