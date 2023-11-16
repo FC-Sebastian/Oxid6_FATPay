@@ -17,7 +17,8 @@ class Payment extends Payment_parent
         $oQueryBuilder
             ->select('oxid')
             ->from('oxpayments')
-            ->where('oxid LIKE fatpay');
+            ->where('oxid = ?')
+            ->setParameter(0, 'fatpay');
 
         $oResult = $oQueryBuilder->execute();
 
