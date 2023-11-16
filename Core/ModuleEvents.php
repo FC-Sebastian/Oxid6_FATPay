@@ -21,6 +21,7 @@ class ModuleEvents
             $oPayment->setId('fatpay');
             $oPayment->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FAT-Pay');
             $oPayment->oxpayments__oxtoamount = new \OxidEsales\Eshop\Core\Field(1000000);
+            $oPayment->save();
         }
     }
 
@@ -29,6 +30,8 @@ class ModuleEvents
         $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
         if ($oPayment->fcHasFatPay() === true) {
             $oPayment->load('fatpay');
+            $oPayment->oxpayments__oxactive = new \OxidEsales\Eshop\Core\Field(0);
+            $oPayment->save();
         }
     }
 }
