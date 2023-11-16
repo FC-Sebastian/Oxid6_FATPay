@@ -1,6 +1,6 @@
 <?php
 
-namespace Fatchip\extend\Application\Model;
+namespace Fatchip\FATPay\extend\Application\Model;
 
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
