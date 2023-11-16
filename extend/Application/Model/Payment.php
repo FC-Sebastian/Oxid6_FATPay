@@ -5,7 +5,7 @@ namespace Fatchip\FATPay\extend\Application\Model;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
 
-class Payment extends Payment_parent
+class Payment extends Payment_Parent
 {
     public function fcHasFatPay()
     {
