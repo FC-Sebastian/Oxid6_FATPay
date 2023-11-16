@@ -16,7 +16,7 @@ class ModuleEvents
 
     public static function insertFatPayPayment()
     {
-        $oPayment = oxNew(\Fatchip\FATPay\extend\Application\Model\Payment::class);
+        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
         if ($oPayment->fcHasFatPay() === false) {
             $oPayment->setId('fatpay');
             $oPayment->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FAT-Pay');
@@ -26,7 +26,7 @@ class ModuleEvents
 
     public static function setFatPayInactive()
     {
-        $oPayment = oxNew(\Fatchip\FATPay\extend\Application\Model\Payment::class);
+        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
         if ($oPayment->fcHasFatPay() === true) {
             $oPayment->load('fatpay');
         }
