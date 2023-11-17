@@ -26,6 +26,11 @@ $aModule = [
             'block'    => 'checkout_payment_longdesc',
             'file'     => 'checkout_payment_longdesc.tpl'
         ],
+        [
+            'template' => 'page/checkout/order.tpl',
+            'block'    => 'checkout_order_btn_submit_bottom',
+            'file'     => 'checkout_order_btn_submit_bottom.tpl'
+        ]
     ],
     'events'      => [
         'onActivate' => 'Fatchip\FATPay\Core\ModuleEvents::onActivate',
@@ -33,10 +38,6 @@ $aModule = [
     ],
     'extend'      => [
         \OxidEsales\Eshop\Application\Model\Payment::class => \Fatchip\FATPay\extend\Application\Model\Payment::class
-    ],
-    'controllers' => [
-    ],
-    'templates'   => [
     ],
     'settings'    => [
         ['group' => 'main', 'name' => 'sFcApiUrl', 'type' => 'str', 'value' => '']
