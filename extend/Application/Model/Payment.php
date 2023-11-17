@@ -54,7 +54,7 @@ class Payment extends Payment_parent
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
         echo '<pre>';
-        echo json_encode($oLang->getLanguageArray());
+        echo print_r($oLang->getLanguageArray());
         echo '</pre>';
     }
 }
