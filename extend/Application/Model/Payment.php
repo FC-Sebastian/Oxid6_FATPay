@@ -41,9 +41,20 @@ class Payment extends Payment_parent
 
     public function fcCreateFatPayPayment()
     {
+
+
+
         $this->setId('fatpay');
-        $this->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FAT-Pay');
+        $this->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FATPay');
         $this->oxpayments__oxtoamount = new \OxidEsales\Eshop\Core\Field(1000000);
         $this->save();
+    }
+
+    public function test()
+    {
+        $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
+        echo '<pre>';
+        echo json_encode($oLang->getLanguageArray());
+        echo '</pre>';
     }
 }
