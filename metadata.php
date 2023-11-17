@@ -24,7 +24,7 @@ $aModule = [
         [
             'template' => 'page/checkout/payment.tpl',
             'block'    => 'select_payment',
-            'file'     => 'select_payment.tpl'
+            'file'     => 'select_payment'
         ],
     ],
     'events'      => [
