@@ -53,7 +53,7 @@ class Payment extends Payment_parent
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
         foreach ($oLang->getLanguageArray() as $aLang) {
-            $this->loadInLang($aLang->oxid, 'fatpay');
+            $this->loadInLang($aLang->id, 'fatpay');
             $this->assign(['oxdesc' => 'FATPay']);
             $this->save();
         }
