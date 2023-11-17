@@ -22,7 +22,7 @@ $aModule = [
     'author'      => 'FC-Sebastian',
     'blocks'      => [
         [
-            'template' => 'page/chechout/payment_other.tpl',
+            'template' => 'page/chechout/payment.tpl',
             'block'    => 'select_payment',
             'file'     => 'select_payment.tpl'
         ],
