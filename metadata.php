@@ -24,7 +24,7 @@ $aModule = [
         [
             'template' => 'page/checkout/inc/payment_other.tpl',
             'block'    => 'checkout_payment_longdesc',
-            'file'     => 'checkout_payment_longdesc.tpl'
+            'file'     => 'out/blocks/checkout_payment_longdesc.tpl'
         ],
     ],
     'events'      => [
