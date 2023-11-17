@@ -28,33 +28,68 @@ class Payment extends Payment_parent
     public function fcSetFatPayActive()
     {
         $this->load('fatpay');
-        $this->oxpayments__oxactive = new \OxidEsales\Eshop\Core\Field(1);
+        $this->assign(['oxactive' => 1]);
         $this->save();
     }
 
     public function fcSetFatPayInActive()
     {
         $this->load('fatpay');
-        $this->oxpayments__oxactive = new \OxidEsales\Eshop\Core\Field(0);
+        $this->assign(['oxactive' => 0]);
         $this->save();
     }
 
     public function fcCreateFatPayPayment()
     {
-
-
-
         $this->setId('fatpay');
-        $this->oxpayments__oxdesc = new \OxidEsales\Eshop\Core\Field('FATPay');
-        $this->oxpayments__oxtoamount = new \OxidEsales\Eshop\Core\Field(1000000);
+        $this->assign(['oxtoamount' => 1000000]);
         $this->save();
+
+        $this->fcSetDescription();
+        $this->fcSetDelivery();
     }
 
-    public function test()
+    public function fcSetDescription()
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
-        echo '<pre>';
-        echo print_r($oLang->getLanguageArray());
-        echo '</pre>';
+        foreach ($oLang->getLanguageArray() as $aLang) {
+            $this->loadInLang($aLang['id'],'fatpay');
+            $this->assign(['oxdesc' => 'FATPay']);
+            $this->save();
+        }
+    }
+
+    public function fcSetDelivery()
+    {
+        $aDeliveryOptions = $this->fcGetDeliveryOptions();
+        if (!empty($aDeliveryOptions)) {
+            foreach ($aDeliveryOptions as $aDeliveryOption) {
+                $oModel = oxNew(\OxidEsales\Eshop\Core\Model\BaseModel::class);
+                $oModel->init('oxobject2payment');
+                $oModel->assign(
+                    [
+                        'oxpaymentid' => 'fatpay',
+                        'oxobjectid'  => $aDeliveryOption['oxid'],
+                        'oxtype' => 'oxdelset'
+                    ]
+                );
+                $oModel->save();
+            }
+        }
+    }
+
+    public function fcGetDeliveryOptions()
+    {
+        $oQueryBuilder = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(QueryBuilderFactoryInterface::class)
+            ->create();
+
+        $oResult = $oQueryBuilder
+            ->select('oxid')
+            ->from('oxdeliveryset')
+            ->execute();
+
+        return $oResult->fetchAllAssociative();
     }
 }
