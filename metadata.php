@@ -22,7 +22,7 @@ $aModule = [
     'author'      => 'FC-Sebastian',
     'blocks'      => [
         [
-            'template' => 'page/checkout/inc/payment.tpl',
+            'template' => 'page/checkout/inc/payment_other.tpl',
             'block'    => 'checkout_payment_longdesc',
             'file'     => 'checkout_payment_longdesc.tpl'
         ],
