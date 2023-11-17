@@ -23,8 +23,8 @@ $aModule = [
     'blocks'      => [
         [
             'template' => 'page/chechout/inc/payment_other.tpl',
-            'block'    => 'checkout_payment_longdesc',
-            'file'     => 'checkout_payment_longdesc.tpl'
+            'block'    => 'select_payment',
+            'file'     => 'select_payment.tpl'
         ],
     ],
     'events'      => [
