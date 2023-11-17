@@ -22,9 +22,9 @@ $aModule = [
     'author'      => 'FC-Sebastian',
     'blocks'      => [
         [
-            'template' => '',
-            'block'    => '',
-            'file'     => ''
+            'template' => 'page/chechout/inc/payment_other.tpl',
+            'block'    => 'checkout_payment_longdesc',
+            'file'     => 'checkout_payment_longdesc.tpl'
         ],
     ],
     'events'      => [
