@@ -29,7 +29,7 @@
         [{/if}]
 
     </script>
-    <p>[{$oViewConf->fatpayGetModuleVersion()}]</p>
+    <pre>[{$oViewConf->fatpayGetModuleVersion()}]</pre>
     [{oxscript include=$oViewConf->getModuleUrl('fcfatpay', 'out/src/js/fatpay.js')}]
 [{else}]
     [{$smarty.block.parent}]
