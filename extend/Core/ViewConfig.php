@@ -8,6 +8,6 @@ class ViewConfig extends ViewConfig_parent
     {
         $oContainer = \OxidEsales\EshopCommunity\Internal\Container\ContainerFactory::getInstance()->getContainer();
         $oContainer = $oContainer->get(\OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface::class)->get();
-        return json_encode($oContainer->getModuleConfiguration('fcfatpay'));
+        return json_encode(get_class_methods($oContainer->getModuleConfiguration('fcfatpay')));
     }
 }
