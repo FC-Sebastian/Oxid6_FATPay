@@ -4,9 +4,13 @@
         <img class="fatpay-logo-checkout" src="[{$oViewConf->getModuleUrl('fcfatpay', 'out/src/img/fatpay.svg')}]" alt="">
     </button>
     <script type="text/javascript">
-        let shopversion = '[{$oView->getShopVersion()}]';
+        [{assign var=oConfig value=$oViewConf->getConfig()}]
+        let fcUrl = '[{$oConfig->getConfigParam('fcfatpayApiUrl')}]';
+        let fcShopVersion = '[{$oView->getShopVersion()}]';
+        let fcFatPayVersion = '[{$oViewConf->fatpayGetModuleVersion()}]';
+        let fcActiveLang = '[{$oViewConf->getActLanguageAbbr()}]';
 
-        let billingaddress = {
+        let fcBillingAddress = {
             firstname: '[{$oxcmp_user->oxuser__oxfname->value}]',
             lastname: '[{$oxcmp_user->oxuser__oxlname->value}]',
             street: '[{$oxcmp_user->oxuser__oxstreet->value}] [{$oxcmp_user->oxuser__oxstreetnr->value}]',
@@ -16,7 +20,7 @@
         };
 
         [{if $oDelAdress}]
-            let shippingaddress = {
+        let fcShippingAddress = {
                 firstname: '[{$oDelAdress->oxaddress__oxfname->value}]',
                 lastname: '[{$oDelAdress->oxaddress__oxlname->value}]',
                 street: '[{$oDelAdress->oxaddress__oxstreet->value}] [{$oDelAdress->oxaddress__oxstreetnr->value}]',
@@ -25,11 +29,15 @@
                 country: '[{$oDelAdress->oxaddress__oxcountry->value}]'
             };
         [{else}]
-            let shippingaddress = billingaddress;
+        let fcShippingAddress = fcBillingAddress;
         [{/if}]
 
+        [{assign var=fcBasketPrice value=$oxcmp_basket->getPrice()}]
+        let fcEmail = '[{$oxcmp_user->oxuser__oxusername->value}]';
+        let fcCustNr = '[{$oxcmp_user->oxuser__oxcustnr->value}]';
+        let fcOrderSum = '[{$fcBasketPrice->getNettoPrice()}]';
+        let fcCurrency = '[{$currency->name}]';
     </script>
-    <pre>[{$oViewConf->fatpayGetModuleVersion()}]</pre>
     [{oxscript include=$oViewConf->getModuleUrl('fcfatpay', 'out/src/js/fatpay.js')}]
 [{else}]
     [{$smarty.block.parent}]

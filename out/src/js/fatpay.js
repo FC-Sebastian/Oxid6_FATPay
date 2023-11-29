@@ -1,20 +1,50 @@
 let fatpay_form = document.getElementById('orderConfirmAgbBottom');
+let fatpay_errorDiv = document.getElementById('fatpay_error_div');
 
 fatpay_form.addEventListener('submit', fatpay_verify);
 
-async function fatpay_verify(e) {
+function fatpay_verify(e) {
     e.preventDefault();
-    let url = 'http://localhost:81';
-    let data = {shopsystem: 'oxid'};
-    const respone = await fetch(url);
-    const status = await respone.json();
+    fatpay_errorDiv.className = 'd-none';
+    let data = {
+        shopsystem: 'oxid',
+        shopversion: fcShopVersion,
+        moduleversion: fcFatPayVersion,
+        language: fcActiveLang,
+        billing_firstname: fcBillingAddress.firstname,
+        billing_lastname: fcBillingAddress.lastname,
+        billing_street: fcBillingAddress.street,
+        billing_zip: fcBillingAddress.zip,
+        billing_city: fcBillingAddress.city,
+        billing_country: fcBillingAddress.country,
+        shipping_firstname: fcShippingAddress.firstname,
+        shipping_lastname: fcShippingAddress.lastname,
+        shipping_street: fcShippingAddress.street,
+        shipping_zip: fcShippingAddress.zip,
+        shipping_city: fcShippingAddress.city,
+        shipping_country: fcShippingAddress.country,
+        email: fcEmail,
+        customer_nr: fcCustNr,
+        order_sum: fcOrderSum,
+        currency: fcCurrency
+    };
 
-    if (status.status === 'APPROVED') {
-        fatpay_form.submit();
-    } else if (status.status === 'ERROR') {
-        document.getElementById('fatpay_error_div').className = '';
-        document.getElementById('fatpay_error_message').innerHTML = status.errormessage;
-    } else {
-        console.log(status);
-    }
+    fetch(fcUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'data=' + JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(response => {
+            if (response.status === 'APPROVED') {
+                fatpay_form.submit();
+            } else if (response.status === 'ERROR') {
+                document.getElementById('fatpay_error_message').innerHTML = response.errormessage;
+                fatpay_errorDiv.className = '';
+                fatpay_errorDiv.scrollIntoView({behavior: 'smooth'});
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
 }

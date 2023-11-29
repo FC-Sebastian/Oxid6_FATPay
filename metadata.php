@@ -47,6 +47,6 @@ $aModule = [
         \OxidEsales\Eshop\Core\ViewConfig::class => \Fatchip\FATPay\extend\Core\ViewConfig::class
     ],
     'settings'    => [
-        ['group' => 'main', 'name' => 'sFcApiUrl', 'type' => 'str', 'value' => '']
+        ['group' => 'main', 'name' => 'fcfatpayApiUrl', 'type' => 'str', 'value' => '']
     ]
 ];
