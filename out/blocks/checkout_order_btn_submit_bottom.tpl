@@ -7,7 +7,7 @@
         [{assign var=oConfig value=$oViewConf->getConfig()}]
         let fcUrl = '[{$oConfig->getConfigParam('fcfatpayApiUrl')}]';
         let fcShopVersion = '[{$oView->getShopVersion()}]';
-        let fcFatPayVersion = '[{$oViewConf->fatpayGetModuleVersion()}]';
+        let fcFatPayVersion = '[{$oViewConf->fcGetFatpayVersion()}]';
         let fcActiveLang = '[{$oViewConf->getActLanguageAbbr()}]';
 
         let fcBillingAddress = {

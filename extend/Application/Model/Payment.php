@@ -49,7 +49,7 @@ class Payment extends Payment_parent
         $this->fcSetDelivery();
     }
 
-    public function fcSetDescription()
+    protected function fcSetDescription()
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
         foreach ($oLang->getLanguageArray() as $aLang) {
@@ -59,7 +59,7 @@ class Payment extends Payment_parent
         }
     }
 
-    public function fcSetDelivery()
+    protected function fcSetDelivery()
     {
         $aDeliveryOptions = $this->fcGetDeliveryOptions();
         if (!empty($aDeliveryOptions)) {
@@ -78,7 +78,7 @@ class Payment extends Payment_parent
         }
     }
 
-    public function fcGetDeliveryOptions()
+    protected function fcGetDeliveryOptions()
     {
         $oQueryBuilder = ContainerFactory::getInstance()
             ->getContainer()

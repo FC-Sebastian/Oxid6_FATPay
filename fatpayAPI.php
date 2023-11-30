@@ -1,24 +1,48 @@
 <?php
-$sServer = 'mysql.localhost';
-$sUser = 'root';
-$sPassword = 'dockerroot';
-$sDb = 'fatpay';
-$sTable = 'transactions';
 
-$oConn = new mysqli($sServer, $sUser, $sPassword);
-if ($oConn->connect_error) {
-    die('MySQL connection error: '.$oConn->connect_error);
-}
-$sQuery = 'CREATE DATABASE IF NOT EXISTS '.$sDb;
-$oConn->query($sQuery);
-$oConn->close();
+class FatpayApi
+{
+    public $sServer = 'mysql.localhost';
+    public $sUser = 'root';
+    public $sPassword = 'dockerroot';
+    public $sDb = 'fatpay';
+    public $sTable = 'transactions';
 
-$oConn = new mysqli($sServer, $sUser, $sPassword, $sDb);
-if ($oConn->connect_error) {
-    die('MySQL connection error: '.$oConn->connect_error);
-}
+    public function validatePayment()
+    {
+        $this->createDb();
+        $this->createTable();
 
-$sQuery = 'CREATE TABLE IF NOT EXISTS '.$sTable.' (
+        header('Content-Type: application/json');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+
+        $aData = json_decode($_POST['data'],true);
+        $this->insertTransaction($aData);
+
+        $aStatus = ['status' => 'APPROVED'];
+        if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
+            $aStatus['status'] = 'ERROR';
+            $aStatus['errormessage'] = 'no failures allowed';
+        }
+
+        echo json_encode($aStatus);
+    }
+
+    protected function createDb()
+    {
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword);
+        $sQuery = 'CREATE DATABASE IF NOT EXISTS '.$this->sDb;
+        $oConn->query($sQuery);
+        $oConn->close();
+    }
+
+    protected function createTable()
+    {
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+
+        $sQuery = 'CREATE TABLE IF NOT EXISTS '.$this->sTable.' (
 id int AUTO_INCREMENT PRIMARY KEY,
 transaction_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 shop VARCHAR(255) NOT NULL,
@@ -42,10 +66,14 @@ customer_nr VARCHAR(255),
 amount DECIMAL(8,2),
 currency VARCHAR(3)
 )';
-$oConn->query($sQuery);
-$oConn->close();
+        $oConn->query($sQuery);
+        $oConn->close();
+    }
 
-$sQuery = 'INSERT INTO '.$sTable.' (
+    protected function insertTransaction($aData)
+    {
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+        $sQuery = 'INSERT INTO '.$this->sTable.' (
 shop, 
 shop_version, 
 fatpay_version, 
@@ -67,50 +95,46 @@ customer_nr,
 amount,
 currency
 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        $oStmt = $oConn->prepare($sQuery);
 
-$oConn = new mysqli($sServer, $sUser, $sPassword, $sDb);
-if ($oConn->connect_error) {
-    die('MySQL connection error: '.$oConn->connect_error);
-}
-$oStmt = $oConn->prepare($sQuery);
+        $oStmt->bind_param(
+            'ssssssssssssssssssds',
+            $aData['shopsystem'],
+            $aData['shopversion'],
+            $aData['moduleversion'],
+            $aData['language'],
+            $aData['billing_firstname'],
+            $aData['billing_lastname'],
+            $aData['billing_street'],
+            $aData['billing_zip'],
+            $aData['billing_city'],
+            $aData['billing_country'],
+            $aData['shipping_firstname'],
+            $aData['shipping_lastname'],
+            $aData['shipping_street'],
+            $aData['shipping_zip'],
+            $aData['shipping_city'],
+            $aData['shipping_country'],
+            $aData['email'],
+            $aData['customer_nr'],
+            $aData['order_sum'],
+            $aData['currency']
+        );
+        $oStmt->execute();
+        $oConn->close();
+    }
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-$aData = json_decode($_POST['data'],true);
-$aStatus = ['status' => 'APPROVED'];
-
-$oStmt->bind_param(
-    'ssssssssssssssssssds',
-    $aData['shopsystem'],
-    $aData['shopversion'],
-    $aData['moduleversion'],
-    $aData['language'],
-    $aData['billing_firstname'],
-    $aData['billing_lastname'],
-    $aData['billing_street'],
-    $aData['billing_zip'],
-    $aData['billing_city'],
-    $aData['billing_country'],
-    $aData['shipping_firstname'],
-    $aData['shipping_lastname'],
-    $aData['shipping_street'],
-    $aData['shipping_zip'],
-    $aData['shipping_city'],
-    $aData['shipping_country'],
-    $aData['email'],
-    $aData['customer_nr'],
-    $aData['order_sum'],
-    $aData['currency']
-);
-$oStmt->execute();
-$oConn->close();
-
-if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
-    $aStatus['status'] = 'ERROR';
-    $aStatus['errormessage'] = 'no failures allowed';
+    protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
+        $oConn = new mysqli($sServer, $sUser, $sPassword, $sDb);
+        if ($oConn->connect_error) {
+            die(json_encode(['MySQL connection error: '.$oConn->connect_error]));
+        }
+        return $oConn;
+    }
 }
 
-echo json_encode($aStatus);
+if (!defined('PHP_UNIT')) {
+    $oApi = new FatpayApi();
+    $oApi->validatePayment();
+}
+

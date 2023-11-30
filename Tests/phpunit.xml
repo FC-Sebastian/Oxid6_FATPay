@@ -1,0 +1,10 @@
+<phpunit>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">../extend/Application/Model</directory>
+            <directory suffix=".php">../extend/Core</directory>
+            <directory suffix=".php">../Core</directory>
+            <file>../fatpayAPI.php</file>
+        </whitelist>
+    </filter>
+</phpunit>
