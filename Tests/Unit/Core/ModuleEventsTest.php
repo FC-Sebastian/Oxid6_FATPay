@@ -10,14 +10,14 @@ class ModuleEventsTest extends \OxidEsales\TestingLibrary\UnitTestCase
     {
         $oDb = $this->getDb();
         $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE oxpaymentid = 'fatpay'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
     }
 
     public function tearDown(): void
     {
         $oDb = $this->getDb();
         $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE oxpaymentid = 'fatpay'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
     }
 
     public function testOnActivate()
@@ -26,7 +26,7 @@ class ModuleEventsTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oEvents = new ModuleEvents();
         $oEvents::onActivate();
 
-        $this->assertEquals(1, $oDb->getOne("SELECT oxactive FROM oxpayments WHERE oxid = 'fatpay'"));
+        $this->assertEquals(1, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID = 'fatpay'"));
         $this->assertEquals(
             $oDb->getOne("SELECT COUNT(OXID) FROM oxdeliveryset"),
             $oDb->getOne("SELECT COUNT(OXID) FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'")
@@ -40,6 +40,6 @@ class ModuleEventsTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oEvents::onActivate();
         $oEvents::onDeactivate();
 
-        $this->assertEquals(0, $oDb->getOne("SELECT oxactive FROM oxpayments WHERE oxid = 'fatpay'"));
+        $this->assertEquals(0, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID = 'fatpay'"));
     }
 }

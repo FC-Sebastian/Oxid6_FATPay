@@ -10,14 +10,14 @@ class PaymentTest extends \OxidEsales\TestingLibrary\UnitTestCase
     {
         $oDb = $this->getDb();
         $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE oxpaymentid = 'fatpay'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
     }
 
     public function tearDown(): void
     {
         $oDb = $this->getDb();
         $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE oxpaymentid = 'fatpay'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
     }
 
     public function testFcHasFatPay()
@@ -61,9 +61,9 @@ class PaymentTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oDb = $this->getDb();
 
         $oPayment->fcSetFatPayInActive();
-        $this->assertEquals(0, $oDb->getOne("SELECT oxactive FROM oxpayments WHERE oxid='fatpay'"));
+        $this->assertEquals(0, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID='fatpay'"));
 
         $oPayment->fcSetFatPayActive();
-        $this->assertEquals(1, $oDb->getOne("SELECT oxactive FROM oxpayments WHERE oxid='fatpay'"));
+        $this->assertEquals(1, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID='fatpay'"));
     }
 }
