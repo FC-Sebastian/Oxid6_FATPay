@@ -37,7 +37,7 @@ class PaymentTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oPayment = new Payment();
         $this->assertEquals(false, $oPayment->fcHasFatPay());
 
-        $oPayment->fcCreateFatPayPayment();
+        $oPayment->fcCreateFatPayPayments();
 
         $oPayment = new Payment();
         $this->assertEquals(true, $oPayment->fcHasFatPay());
@@ -57,7 +57,7 @@ class PaymentTest extends \OxidEsales\TestingLibrary\UnitTestCase
     public function testFatPayActivation()
     {
         $oPayment = new Payment();
-        $oPayment->fcCreateFatPayPayment();
+        $oPayment->fcCreateFatPayPayments();
         $oDb = $this->getDb();
 
         $oPayment->fcSetFatPayInActive();

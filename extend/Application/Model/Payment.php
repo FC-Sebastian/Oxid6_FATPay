@@ -39,27 +39,32 @@ class Payment extends Payment_parent
         $this->save();
     }
 
-    public function fcCreateFatPayPayment()
+    public function fcCreateFatPayPayments()
     {
         $this->setId('fatpay');
         $this->assign(['oxtoamount' => 1000000]);
         $this->save();
+        $this->setId('fatredirect');
+        $this->assign(['oxtoamount' => 1000000]);
+        $this->save();
 
-        $this->fcSetDescription();
-        $this->fcSetDelivery();
+        $this->fcSetDescription('fatpay', 'FATPay');
+        $this->fcSetDescription('fatredirect', 'FATRedirect');
+        $this->fcSetDelivery('fatpay');
+        $this->fcSetDelivery('fatredirect');
     }
 
-    protected function fcSetDescription()
+    protected function fcSetDescription($sOxid, $sDesc)
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
         foreach ($oLang->getLanguageArray() as $aLang) {
-            $this->loadInLang($aLang->id, 'fatpay');
-            $this->assign(['oxdesc' => 'FATPay']);
+            $this->loadInLang($aLang->id, $sOxid);
+            $this->assign(['oxdesc' => $sDesc]);
             $this->save();
         }
     }
 
-    protected function fcSetDelivery()
+    protected function fcSetDelivery($sOxid)
     {
         $aDeliveryOptions = $this->fcGetDeliveryOptions();
         if (!empty($aDeliveryOptions)) {
@@ -68,7 +73,7 @@ class Payment extends Payment_parent
                 $oModel->init('oxobject2payment');
                 $oModel->assign(
                     [
-                        'oxpaymentid' => 'fatpay',
+                        'oxpaymentid' => $sOxid,
                         'oxobjectid'  => $aDeliveryOption['oxid'],
                         'oxtype' => 'oxdelset'
                     ]

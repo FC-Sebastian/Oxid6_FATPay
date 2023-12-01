@@ -3,7 +3,7 @@
 namespace Fatchip\FATPay\Tests\Unit;
 
 define('PHP_UNIT', true);
-include_once __DIR__.'/../../fatpayAPI.php';
+include_once __DIR__ . '/../../fatpayAPI.php';
 
 class fatpayAPITest extends \PHPUnit\Framework\TestCase
 {

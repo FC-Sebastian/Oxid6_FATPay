@@ -18,7 +18,7 @@ class ModuleEvents
     {
         $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
         if ($oPayment->fcHasFatPay() === false) {
-            $oPayment->fcCreateFatPayPayment();
+            $oPayment->fcCreateFatPayPayments();
         } else {
             $oPayment->fcSetFatPayActive();
         }
