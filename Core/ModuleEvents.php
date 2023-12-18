@@ -20,7 +20,8 @@ class ModuleEvents
         if ($oPayment->fcHasFatPay() === false) {
             $oPayment->fcCreateFatPayPayments();
         } else {
-            $oPayment->fcSetFatPayActive();
+            $oPayment->fcSetPaymentActive('fatpay');
+            $oPayment->fcSetPaymentActive('fatredirect');
         }
     }
 
@@ -28,7 +29,8 @@ class ModuleEvents
     {
         $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
         if ($oPayment->fcHasFatPay() === true) {
-            $oPayment->fcSetFatPayInActive();
+            $oPayment->fcSetPaymentInActive('fatpay');
+            $oPayment->fcSetPaymentInActive('fatredirect');
         }
     }
 }

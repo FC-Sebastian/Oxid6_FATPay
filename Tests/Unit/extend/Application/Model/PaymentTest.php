@@ -60,10 +60,10 @@ class PaymentTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oPayment->fcCreateFatPayPayments();
         $oDb = $this->getDb();
 
-        $oPayment->fcSetFatPayInActive();
+        $oPayment->fcSetPaymentInActive('fatpay');
         $this->assertEquals(0, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID='fatpay'"));
 
-        $oPayment->fcSetFatPayActive();
+        $oPayment->fcSetPaymentActive('fatpay');
         $this->assertEquals(1, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID='fatpay'"));
     }
 }

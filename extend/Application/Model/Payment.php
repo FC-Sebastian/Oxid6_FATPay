@@ -25,16 +25,16 @@ class Payment extends Payment_parent
         return !empty($oResult->fetchOne());
     }
 
-    public function fcSetFatPayActive()
+    public function fcSetPaymentActive($sPaymentId)
     {
-        $this->load('fatpay');
+        $this->load($sPaymentId);
         $this->assign(['oxactive' => 1]);
         $this->save();
     }
 
-    public function fcSetFatPayInActive()
+    public function fcSetPaymentInActive($sPaymentId)
     {
-        $this->load('fatpay');
+        $this->load($sPaymentId);
         $this->assign(['oxactive' => 0]);
         $this->save();
     }
