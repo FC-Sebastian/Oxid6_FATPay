@@ -1,7 +1,7 @@
-[{if $payment->getId() == 'fatpay'}]
+[{if $payment->getId() == 'fatpay' || $payment->getId() == 'fatredirect'}]
     [{oxstyle include=$oViewConf->getModuleUrl('fcfatpay', 'out/src/css/fatpay.css')}]
     <button type="submit" class="btn btn-lg btn-dark float-right submitButton nextStep largeButton">
-        <img class="fatpay-logo-checkout" src="[{$oViewConf->getModuleUrl('fcfatpay', 'out/src/img/fatpay.svg')}]" alt="">
+        <img class="fatpay-logo-checkout" src="[{$oViewConf->getModuleUrl('fcfatpay', 'out/src/img/')}][{$payment->getId()}].svg" alt="">
     </button>
     <script type="text/javascript">
         [{assign var=oConfig value=$oViewConf->getConfig()}]
@@ -20,7 +20,7 @@
         };
 
         [{if $oDelAdress}]
-        let fcShippingAddress = {
+            let fcShippingAddress = {
                 firstname: '[{$oDelAdress->oxaddress__oxfname->value}]',
                 lastname: '[{$oDelAdress->oxaddress__oxlname->value}]',
                 street: '[{$oDelAdress->oxaddress__oxstreet->value}] [{$oDelAdress->oxaddress__oxstreetnr->value}]',
@@ -29,7 +29,7 @@
                 country: '[{$oDelAdress->oxaddress__oxcountry->value}]'
             };
         [{else}]
-        let fcShippingAddress = fcBillingAddress;
+            let fcShippingAddress = fcBillingAddress;
         [{/if}]
 
         [{assign var=fcBasketPrice value=$oxcmp_basket->getPrice()}]
@@ -37,7 +37,11 @@
         let fcCustNr = '[{$oxcmp_user->oxuser__oxcustnr->value}]';
         let fcOrderSum = '[{$fcBasketPrice->getNettoPrice()}]';
         let fcCurrency = '[{$currency->name}]';
+        let fcPaymentMethod = '[{$payment->getId()}]';
     </script>
+    [{if $payment->getId() == 'fatpay' || $payment->getId() == 'fatredirect'}]
+        <input id="fatredirect_url" name="fatredirect_url" type="hidden">
+    [{/if}]
     [{oxscript include=$oViewConf->getModuleUrl('fcfatpay', 'out/src/js/fatpay.js')}]
 [{else}]
     [{$smarty.block.parent}]

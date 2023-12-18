@@ -19,10 +19,13 @@ class FatpayApi
         header('Access-Control-Allow-Headers: Content-Type');
 
         $aData = json_decode($_POST['data'],true);
-        $this->insertTransaction($aData);
+        $this->logTransaction($aData);
 
         $aStatus = ['status' => 'APPROVED'];
-        if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
+        if ($aData['payment_type'] == 'fatredirect') {
+            $aStatus['status'] = 'REDIRECT';
+            $aStatus['url'] = str_replace('fatpayAPI.php', 'fatredirectVerify.php','http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+        } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             $aStatus['status'] = 'ERROR';
             $aStatus['errormessage'] = 'no failures allowed';
         }
@@ -48,6 +51,7 @@ transaction_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
 shop VARCHAR(255) NOT NULL,
 shop_version VARCHAR(10) NOT NULL,
 fatpay_version VARCHAR(10) NOT NULL,
+payment_type VARCHAR(255) NOT NULL,
 language VARCHAR(4) NOT NULL,
 billing_fname VARCHAR(255),
 billing_lname VARCHAR(255),
@@ -70,13 +74,14 @@ currency VARCHAR(3)
         $oConn->close();
     }
 
-    protected function insertTransaction($aData)
+    protected function logTransaction($aData)
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
         $sQuery = 'INSERT INTO '.$this->sTable.' (
 shop, 
 shop_version, 
-fatpay_version, 
+fatpay_version,
+payment_type, 
 language, 
 billing_fname, 
 billing_lname,
@@ -94,14 +99,15 @@ email,
 customer_nr,
 amount,
 currency
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
         $oStmt = $oConn->prepare($sQuery);
 
         $oStmt->bind_param(
-            'ssssssssssssssssssds',
+            'sssssssssssssssssssds',
             $aData['shopsystem'],
             $aData['shopversion'],
             $aData['moduleversion'],
+            $aData['payment_type'],
             $aData['language'],
             $aData['billing_firstname'],
             $aData['billing_lastname'],

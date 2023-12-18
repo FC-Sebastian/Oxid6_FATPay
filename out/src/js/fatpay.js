@@ -26,7 +26,8 @@ function fatpay_verify(e) {
         email: fcEmail,
         customer_nr: fcCustNr,
         order_sum: fcOrderSum,
-        currency: fcCurrency
+        currency: fcCurrency,
+        payment_type: fcPaymentMethod
     };
 
     fetch(fcUrl, {
@@ -38,10 +39,15 @@ function fatpay_verify(e) {
         .then(response => {
             if (response.status === 'APPROVED') {
                 fatpay_form.submit();
+            } else if (response.status === 'REDIRECT') {
+                document.getElementById('fatredirect_url').value = response.url;
+                fatpay_form.submit();
             } else if (response.status === 'ERROR') {
                 document.getElementById('fatpay_error_message').innerHTML = response.errormessage;
                 fatpay_errorDiv.className = '';
                 fatpay_errorDiv.scrollIntoView({behavior: 'smooth'});
+            } else {
+                console.log(response);
             }
         })
         .catch(error => {
