@@ -14,7 +14,7 @@ $aModule = [
         'de' => 'FATPay-Zahlungsmodul',
         'en' => 'FATPay payment module'
     ],
-    'thumbnail' => '/out/src/img/fatpay.svg',
+    'thumbnail'   => '/out/src/img/fatpay.svg',
     'description' => [
         'de' => 'Ein Modul welches Zahlung mit FATPay ermöglicht',
         'en' => 'A module which enables paying with FATPay'
@@ -39,7 +39,7 @@ $aModule = [
         ]
     ],
     'events'      => [
-        'onActivate' => 'Fatchip\FATPay\Core\ModuleEvents::onActivate',
+        'onActivate'   => 'Fatchip\FATPay\Core\ModuleEvents::onActivate',
         'onDeactivate' => 'Fatchip\FATPay\Core\ModuleEvents::onDeactivate'
     ],
     'extend'      => [
