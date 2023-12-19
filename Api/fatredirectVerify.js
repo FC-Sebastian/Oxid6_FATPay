@@ -1,4 +1,5 @@
-document.getElementById('form').addEventListener('submit', function(e){
+let form = document.getElementById('form');
+form.addEventListener('submit', function(e){
     e.preventDefault();
     verify_age();
 });
@@ -11,6 +12,7 @@ function verify_age()
     if (((today - bday) / (1000*60*60*24*365.25)) < 18) {
         document.getElementById('error').className = '';
     } else {
-        window.location.replace(document.getElementById('refererUrl').value);
+        form.action = document.getElementById('refererUrl').value;
+        form.submit();
     }
 }

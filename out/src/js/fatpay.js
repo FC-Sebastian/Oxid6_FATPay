@@ -32,6 +32,7 @@ function fatpay_verify(e) {
 
     fetch(fcUrl, {
         method: 'POST',
+        mode: "no-cors",
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: 'data=' + JSON.stringify(data)
     })
