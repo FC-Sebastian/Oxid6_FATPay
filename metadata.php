@@ -31,11 +31,6 @@ $aModule = [
             'template' => 'page/checkout/order.tpl',
             'block'    => 'checkout_order_btn_submit_bottom',
             'file'     => 'checkout_order_btn_submit_bottom.tpl'
-        ],
-        [
-            'template' => 'page/checkout/order.tpl',
-            'block'    => 'checkout_order_errors',
-            'file'     => 'checkout_order_errors.tpl'
         ]
     ],
     'events'      => [
@@ -46,7 +41,8 @@ $aModule = [
         \OxidEsales\Eshop\Application\Controller\OrderController::class => \Fatchip\FATPay\extend\Application\Controller\OrderController::class,
         \OxidEsales\Eshop\Application\Model\Payment::class              => \Fatchip\FATPay\extend\Application\Model\Payment::class,
         \OxidEsales\Eshop\Application\Model\Order::class                => \Fatchip\FATPay\extend\Application\Model\Order::class,
-        \OxidEsales\Eshop\Core\ViewConfig::class                        => \Fatchip\FATPay\extend\Core\ViewConfig::class
+        \OxidEsales\Eshop\Core\ViewConfig::class                        => \Fatchip\FATPay\extend\Core\ViewConfig::class,
+        \OxidEsales\Eshop\Application\Model\PaymentGateway::class       => \Fatchip\FATPay\extend\Application\Model\PaymentGateway::class
     ],
     'settings'    => [
         ['group' => 'main', 'name' => 'fcfatpayApiUrl', 'type' => 'str', 'value' => '']
