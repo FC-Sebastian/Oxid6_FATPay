@@ -10,7 +10,7 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Sho
 
 class PaymentGateway extends PaymentGateway_parent
 {
-    public function executePayment($dAmount, $oOrder)
+    public function executePayment($dAmount, &$oOrder)
     {
         $blReturn = parent::executePayment($dAmount, $oOrder);
 
