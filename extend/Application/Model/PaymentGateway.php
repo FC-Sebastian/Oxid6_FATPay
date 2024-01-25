@@ -20,7 +20,7 @@ class PaymentGateway extends PaymentGateway_parent
 
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->fcGetFatPayParams($dAmount, $oOrder));
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['data' => $this->fcGetFatPayParams($dAmount, $oOrder)]));
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
             $sResponse = curl_exec($ch);
