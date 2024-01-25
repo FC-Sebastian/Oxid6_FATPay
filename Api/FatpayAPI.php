@@ -13,12 +13,8 @@ class FatpayApi
         $this->createDb();
         $this->createTable();
 
-        header('Content-Type: application/json');
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type');
+        $aData = json_decode(file_get_contents("php://input"),true);
 
-        $aData = json_decode($_POST['data'],true);
         $this->logTransaction($aData);
 
         $aStatus = ['status' => 'APPROVED'];
