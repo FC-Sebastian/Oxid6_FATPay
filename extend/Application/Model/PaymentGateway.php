@@ -4,6 +4,7 @@ namespace Fatchip\FATPay\extend\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Registry;
+use OxidEsales\Eshop\Core\ShopVersion;
 use OxidEsales\Eshop\Core\ViewConfig;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
@@ -47,7 +48,7 @@ class PaymentGateway extends PaymentGateway_parent
         $oUser->load($oOrder->oxorder__oxuserid->value);
 
         $aReturn['shopsystem'] = 'oxid';
-        $aReturn['shopversion'] = $oViewConf->getShopVersion();
+        $aReturn['shopversion'] = ShopVersion::getVersion();
         $aReturn['moduleversion'] = ContainerFactory::getInstance()
             ->getContainer()
             ->get(ShopConfigurationDaoBridgeInterface::class)
@@ -59,14 +60,26 @@ class PaymentGateway extends PaymentGateway_parent
         $aReturn['billing_street'] = $oOrder->oxorder__oxbillstreet->value;
         $aReturn['billing_zip'] = $oOrder->oxorder__oxbillzip->value;
         $aReturn['billing_city'] = $oOrder->oxorder__oxbillcity->value;
-        $aReturn['billing_country'] = $oOrder->getBillCountry();
+        $aReturn['billing_country'] = $oOrder->getBillCountry()->value;
 
-        $aReturn['shipping_firstname'] = !empty($oOrder->oxorder__oxdelfname->value) ? $oOrder->oxorder__oxdelfname->value : $oOrder->oxorder__oxbillfname->value;
-        $aReturn['shipping_lastname'] = !empty($oOrder->oxorder__oxdellname->value) ? $oOrder->oxorder__oxdellname->value : $oOrder->oxorder__oxbilllname->value;
-        $aReturn['shipping_street'] = !empty($oOrder->oxorder__oxdelstreet->value) ? $oOrder->oxorder__oxdelstreet->value : $oOrder->oxorder__oxbillstreet->value;
-        $aReturn['shipping_zip'] = !empty($oOrder->oxorder__oxdelzip->value) ? $oOrder->oxorder__oxdelzip->value : $oOrder->oxorder__oxbillzip->value;
-        $aReturn['shipping_city'] = !empty($oOrder->oxorder__oxdelcity->value) ? $oOrder->oxorder__oxdelcity->value : $oOrder->oxorder__oxbillcity->value;
-        $aReturn['shipping_country'] = !empty($oOrder->getDelCountry()) ? $oOrder->getDelCountry() : $oOrder->getBillCountry();
+        $aReturn['shipping_firstname'] = !empty($oOrder->oxorder__oxdelfname->value)
+            ? $oOrder->oxorder__oxdelfname->value
+            : $oOrder->oxorder__oxbillfname->value;
+        $aReturn['shipping_lastname'] = !empty($oOrder->oxorder__oxdellname->value)
+            ? $oOrder->oxorder__oxdellname->value
+            : $oOrder->oxorder__oxbilllname->value;
+        $aReturn['shipping_street'] = !empty($oOrder->oxorder__oxdelstreet->value)
+            ? $oOrder->oxorder__oxdelstreet->value
+            : $oOrder->oxorder__oxbillstreet->value;
+        $aReturn['shipping_zip'] = !empty($oOrder->oxorder__oxdelzip->value)
+            ? $oOrder->oxorder__oxdelzip->value
+            : $oOrder->oxorder__oxbillzip->value;
+        $aReturn['shipping_city'] = !empty($oOrder->oxorder__oxdelcity->value)
+            ? $oOrder->oxorder__oxdelcity->value
+            : $oOrder->oxorder__oxbillcity->value;
+        $aReturn['shipping_country'] = !empty($oOrder->getDelCountry()->value)
+            ? $oOrder->getDelCountry()->value
+            : $oOrder->getBillCountry()->value;
 
         $aReturn['email'] = $oUser->oxuser__oxusername->value;
         $aReturn['customer_nr'] = $oUser->oxuser__oxcustnr->value;
