@@ -10,9 +10,9 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Sho
 
 class PaymentGateway extends PaymentGateway_parent
 {
-    public function executePayments($dAmount, $oOrder)
+    public function executePayment($dAmount, $oOrder)
     {
-        $blReturn = parent::execurePayments($dAmount, $oOrder);
+        $blReturn = parent::executePayment($dAmount, $oOrder);
 
         if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay') {
             $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
