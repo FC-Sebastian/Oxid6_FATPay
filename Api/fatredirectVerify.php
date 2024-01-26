@@ -20,6 +20,7 @@
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>
                         <input type="hidden" name="orderId" value="<?= $_REQUEST['orderId'] ?>">
+                        <input type="hidden" name="fnc" value="fcFinalizeFatRedirect">
                     </form>
                 </div>
             </div>

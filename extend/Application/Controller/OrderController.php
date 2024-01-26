@@ -7,7 +7,7 @@ use OxidEsales\Eshop\Core\Registry;
 
 class OrderController extends OrderController_parent
 {
-    public function fcFinalizeFatReditect()
+    public function fcFinalizeFatRedirect()
     {
         $sOxid = Registry::getRequest()->getRequestParameter('orderId');
         if ($sOxid) {
@@ -18,7 +18,7 @@ class OrderController extends OrderController_parent
             $oOrder->save();
 
             $this->getSession()->setBasket($oOrder->getBasket());
-            Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '&cl=thankyou');
+            Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');
         }
     }
 }

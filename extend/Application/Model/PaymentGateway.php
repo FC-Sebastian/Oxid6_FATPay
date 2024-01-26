@@ -15,7 +15,7 @@ class PaymentGateway extends PaymentGateway_parent
     {
         $blReturn = parent::executePayment($dAmount, $oOrder);
 
-        if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay') {
+        if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
             $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
             $ch = curl_init($sApiUrl);
 
@@ -38,7 +38,7 @@ class PaymentGateway extends PaymentGateway_parent
                 return false;
             } elseif ($aResponse['status'] == 'REDIRECT') {
                 $oOrder->save();
-                header(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl'));
+                Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
             }
         }
         return $blReturn;
@@ -88,7 +88,7 @@ class PaymentGateway extends PaymentGateway_parent
         $aReturn['customer_nr'] = $oUser->oxuser__oxcustnr->value;
         $aReturn['order_sum'] = $dAmount;
         $aReturn['currency'] = $oOrder->oxorder__oxcurrency->value;
-        $aReturn['payment_type'] = $oOrder->oxorder__oxpaymentid->value;
+        $aReturn['payment_type'] = $oOrder->oxorder__oxpaymenttype->value;
 
         return $aReturn;
     }

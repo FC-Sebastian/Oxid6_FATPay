@@ -130,7 +130,7 @@ currency
     }
 
     protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
-        $oConn = new mysqli($sServer, $sUser, $sPassword, $sDb);
+        $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
         if ($oConn->connect_error) {
             die(json_encode(['MySQL connection error: '.$oConn->connect_error]));
         }
