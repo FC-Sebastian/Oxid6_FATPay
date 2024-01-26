@@ -5,7 +5,7 @@ namespace Fatchip\FATPay\extend\Application\Controller;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Registry;
 
-class OrderController
+class OrderController extends OrderController_parent
 {
     public function fcFinalizeFatReditect()
     {
