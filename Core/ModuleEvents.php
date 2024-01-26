@@ -2,6 +2,9 @@
 
 namespace Fatchip\FATPay\Core;
 
+use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
+use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInterface;
+
 class ModuleEvents
 {
     public static function onActivate()
@@ -16,21 +19,102 @@ class ModuleEvents
 
     protected static function insertFatPayPayment()
     {
-        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
-        if ($oPayment->fcHasFatPay() === false) {
-            $oPayment->fcCreateFatPayPayments();
+        if (self::hasFatPay() === false) {
+            self::createFatPayPayment('fatpay', 'FATPay', 1000000);
+            self::createFatPayPayment('fatredirect', 'FATRedirect', 1000000);
         } else {
-            $oPayment->fcSetPaymentActive('fatpay');
-            $oPayment->fcSetPaymentActive('fatredirect');
+            self::setPaymentActive('fatpay',1);
+            self::setPaymentActive('fatredirect',1);
         }
     }
 
     protected static function setFatPayInactive()
     {
-        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
-        if ($oPayment->fcHasFatPay() === true) {
-            $oPayment->fcSetPaymentInActive('fatpay');
-            $oPayment->fcSetPaymentInActive('fatredirect');
+        if (self::hasFatPay() === true) {
+            self::setPaymentActive('fatpay',0);
+            self::setPaymentActive('fatredirect',0);
         }
+    }
+
+    protected static function hasFatPay()
+    {
+        $oQueryBuilder = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(QueryBuilderFactoryInterface::class)
+            ->create();
+
+        $oQueryBuilder
+            ->select('oxid')
+            ->from('oxpayments')
+            ->where('oxid = ?')
+            ->setParameter(0, 'fatpay');
+
+        $oResult = $oQueryBuilder->execute();
+
+        return !empty($oResult->fetchOne());
+    }
+
+    protected static function setPaymentActive($sPaymentId, $iValue)
+    {
+        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
+        $oPayment->load($sPaymentId);
+        $oPayment->assign(['oxactive' => $iValue]);
+        $oPayment->save();
+    }
+
+    protected static function createFatPayPayment($sId, $sDesc, $iToAmount)
+    {
+        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
+        $oPayment->setId($sId);
+        $oPayment->assign(['oxtoamount' => $iToAmount]);
+        $oPayment->save();
+
+        self::setDescription($sId, $sDesc);
+        self::setDelivery($sId);
+    }
+
+    protected static function setDescription($sOxid, $sDesc)
+    {
+        $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
+        $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
+        foreach ($oLang->getLanguageArray() as $aLang) {
+            $oPayment->loadInLang($aLang->id, $sOxid);
+            $oPayment->assign(['oxdesc' => $sDesc]);
+            $oPayment->save();
+        }
+    }
+
+    protected static function setDelivery($sOxid)
+    {
+        $aDeliveryOptions = self::getDeliveryOptions();
+        if (!empty($aDeliveryOptions)) {
+            foreach ($aDeliveryOptions as $aDeliveryOption) {
+                $oModel = oxNew(\OxidEsales\Eshop\Core\Model\BaseModel::class);
+                $oModel->init('oxobject2payment');
+                $oModel->assign(
+                    [
+                        'oxpaymentid' => $sOxid,
+                        'oxobjectid'  => $aDeliveryOption['oxid'],
+                        'oxtype' => 'oxdelset'
+                    ]
+                );
+                $oModel->save();
+            }
+        }
+    }
+
+    protected static function getDeliveryOptions()
+    {
+        $oQueryBuilder = ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(QueryBuilderFactoryInterface::class)
+            ->create();
+
+        $oResult = $oQueryBuilder
+            ->select('oxid')
+            ->from('oxdeliveryset')
+            ->execute();
+
+        return $oResult->fetchAllAssociative();
     }
 }
