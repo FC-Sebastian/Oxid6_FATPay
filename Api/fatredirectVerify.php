@@ -20,8 +20,6 @@
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>
                         <input type="hidden" name="orderId" value="<?= $_REQUEST['orderId'] ?>">
-                        <input type="hidden" name="orderStatus" value="<?= $_REQUEST['orderStatus'] ?>">
-                        <input type="hidden" name="fatredirectValid" value="true">
                     </form>
                 </div>
             </div>

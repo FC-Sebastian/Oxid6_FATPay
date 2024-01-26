@@ -24,18 +24,21 @@ class PaymentGateway extends PaymentGateway_parent
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->fcGetFatPayParams($dAmount, $oOrder)));
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
-            $sResponse = curl_exec($ch);
+            $aResponse = curl_exec($ch);
 
             if (curl_errno($ch)) {
                 Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
             }
 
-            $sResponse = json_decode($sResponse,true);
-            if ($sResponse['status'] == 'APPROVED') {
+            $aResponse = json_decode($aResponse,true);
+            if ($aResponse['status'] == 'APPROVED') {
                 return true;
-            } elseif ($sResponse['status'] == 'ERROR') {
-                $this->_sLastError = $sResponse['errormessage'];
+            } elseif ($aResponse['status'] == 'ERROR') {
+                $this->_sLastError = $aResponse['errormessage'];
                 return false;
+            } elseif ($aResponse['status'] == 'REDIRECT') {
+                $oOrder->save();
+                header(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl'));
             }
         }
         return $blReturn;

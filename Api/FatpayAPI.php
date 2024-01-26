@@ -1,5 +1,7 @@
 <?php
 
+namespace Fatchip\FATPay\API;
+
 class FatpayApi
 {
     public $sServer = 'mysql.localhost';
@@ -19,9 +21,10 @@ class FatpayApi
 
         $aStatus = ['status' => 'APPROVED'];
         if ($aData['payment_type'] == 'fatredirect') {
+            //setting status REDIRECT when paying with fatredirect
             $aStatus['status'] = 'REDIRECT';
-            $aStatus['url'] = str_replace('fatpayAPI.php', 'fatredirectVerify.php','http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
+            //setting status ERROR when lastname is 'failed'
             $aStatus['status'] = 'ERROR';
             $aStatus['errormessage'] = 'no failures allowed';
         }
