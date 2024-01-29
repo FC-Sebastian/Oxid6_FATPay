@@ -31,12 +31,12 @@ class PaymentGateway extends PaymentGateway_parent
         return $blReturn;
     }
 
-    protected function fcRedirect($oOrder)
+    public function fcRedirect($oOrder)
     {
         Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
     }
 
-    protected function fcGetApiResponse($dAmount, $oOrder)
+    public function fcGetApiResponse($dAmount, $oOrder)
     {
         $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
         $ch = curl_init($sApiUrl);

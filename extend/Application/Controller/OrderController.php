@@ -22,7 +22,7 @@ class OrderController extends OrderController_parent
         }
     }
 
-    protected function fcRedirect()
+    public function fcRedirect()
     {
         Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');
     }
