@@ -8,7 +8,7 @@ use OxidEsales\Eshop\Core\Registry;
 class OrderController extends OrderController_parent
 {
     /**
-     * Loads order from orderid request parameter sets oxtransstatus of order to 'OK'
+     * Loads order from orderid request parameter and sets oxtransstatus of order to 'OK'
      * then redirects to thankyou controller
      *
      * @return void
