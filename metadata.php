@@ -40,7 +40,6 @@ $aModule = [
     'extend'      => [
         \OxidEsales\Eshop\Application\Controller\OrderController::class => \Fatchip\FATPay\extend\Application\Controller\OrderController::class,
         \OxidEsales\Eshop\Application\Model\Order::class                => \Fatchip\FATPay\extend\Application\Model\Order::class,
-        \OxidEsales\Eshop\Core\ViewConfig::class                        => \Fatchip\FATPay\extend\Core\ViewConfig::class,
         \OxidEsales\Eshop\Application\Model\PaymentGateway::class       => \Fatchip\FATPay\extend\Application\Model\PaymentGateway::class
     ],
     'settings'    => [

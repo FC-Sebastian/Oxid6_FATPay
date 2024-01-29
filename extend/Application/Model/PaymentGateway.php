@@ -52,10 +52,7 @@ class PaymentGateway extends PaymentGateway_parent
 
         $aReturn['shopsystem'] = 'oxid';
         $aReturn['shopversion'] = ShopVersion::getVersion();
-        $aReturn['moduleversion'] = ContainerFactory::getInstance()
-            ->getContainer()
-            ->get(ShopConfigurationDaoBridgeInterface::class)
-            ->get()->getModuleConfiguration('fcfatpay')->getVersion();
+        $aReturn['moduleversion'] = $this->fcGetFatPayVerion();
         $aReturn['language'] = $oViewConf->getActLanguageAbbr();
 
         $aReturn['billing_firstname'] = $oOrder->oxorder__oxbillfname->value;
@@ -91,5 +88,13 @@ class PaymentGateway extends PaymentGateway_parent
         $aReturn['payment_type'] = $oOrder->oxorder__oxpaymenttype->value;
 
         return $aReturn;
+    }
+
+    protected function fcGetFatPayVerion()
+    {
+        return ContainerFactory::getInstance()
+            ->getContainer()
+            ->get(ShopConfigurationDaoBridgeInterface::class)
+            ->get()->getModuleConfiguration('fcfatpay')->getVersion();
     }
 }
