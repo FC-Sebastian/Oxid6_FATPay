@@ -11,6 +11,15 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Sho
 
 class PaymentGateway extends PaymentGateway_parent
 {
+    /**
+     * When payment is fatpay payment gets and evaluates api response otherwise returns parent::executePayment()
+     *
+     * @param $dAmount
+     * @param $oOrder
+     * @return bool
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function executePayment($dAmount, &$oOrder)
     {
         $blReturn = parent::executePayment($dAmount, $oOrder);
@@ -31,11 +40,26 @@ class PaymentGateway extends PaymentGateway_parent
         return $blReturn;
     }
 
+    /**
+     * Redirects to fatredirect validation
+     *
+     * @param $oOrder
+     * @return void
+     */
     public function fcRedirect($oOrder)
     {
         Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
     }
 
+    /**
+     * Sends order data to api and returns response
+     *
+     * @param $dAmount
+     * @param $oOrder
+     * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function fcGetApiResponse($dAmount, $oOrder)
     {
         $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
@@ -50,11 +74,21 @@ class PaymentGateway extends PaymentGateway_parent
 
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
+            return ['status' => 'ERROR', 'errormessage' => 'could not reach FatPay API'];
         }
 
         return json_decode($aResponse,true);
     }
 
+    /**
+     * Returns order data as array
+     *
+     * @param $dAmount
+     * @param $oOrder
+     * @return array
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function fcGetFatPayParams($dAmount, $oOrder)
     {
         $oViewConf = oxNew(ViewConfig::class);
@@ -101,6 +135,13 @@ class PaymentGateway extends PaymentGateway_parent
         return $aReturn;
     }
 
+    /**
+     * Returns version of fatpay module
+     *
+     * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected function fcGetFatPayVerion()
     {
         return ContainerFactory::getInstance()

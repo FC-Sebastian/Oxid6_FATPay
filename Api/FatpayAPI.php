@@ -10,6 +10,11 @@ class FatpayApi
     public $sDb = 'fatpay';
     public $sTable = 'transactions';
 
+    /**
+     * Logs transaction then evaluates payment status and echoes it
+     *
+     * @return void
+     */
     public function validatePayment()
     {
         $this->createDb();
@@ -37,11 +42,21 @@ class FatpayApi
         echo json_encode($aStatus);
     }
 
+    /**
+     * Returns contents of php://input as array
+     *
+     * @return mixed
+     */
     public function getPostData()
     {
         return json_decode(file_get_contents("php://input"),true);
     }
 
+    /**
+     * Creates db if it doesnt exist
+     *
+     * @return void
+     */
     protected function createDb()
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword);
@@ -50,6 +65,11 @@ class FatpayApi
         $oConn->close();
     }
 
+    /**
+     * Creates db table if it doesnt exist
+     *
+     * @return void
+     */
     protected function createTable()
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
@@ -83,6 +103,12 @@ currency VARCHAR(3)
         $oConn->close();
     }
 
+    /**
+     * Logs transaction to db
+     *
+     * @param $aData
+     * @return void
+     */
     protected function logTransaction($aData)
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
@@ -139,6 +165,15 @@ currency
         $oConn->close();
     }
 
+    /**
+     * Returns mysqli connection object
+     *
+     * @param $sServer
+     * @param $sUser
+     * @param $sPassword
+     * @param $sDb
+     * @return \mysqli|void
+     */
     protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
         $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
         if ($oConn->connect_error) {

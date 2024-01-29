@@ -7,6 +7,12 @@ use OxidEsales\Eshop\Core\Registry;
 
 class OrderController extends OrderController_parent
 {
+    /**
+     * Loads order from orderid request parameter sets oxtransstatus of order to 'OK'
+     * then redirects to thankyou controller
+     *
+     * @return void
+     */
     public function fcFinalizeFatRedirect()
     {
         $sOxid = Registry::getRequest()->getRequestParameter('orderId');
@@ -22,6 +28,11 @@ class OrderController extends OrderController_parent
         }
     }
 
+    /**
+     * Redirects to thankyou controller
+     *
+     * @return void
+     */
     public function fcRedirect()
     {
         Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');

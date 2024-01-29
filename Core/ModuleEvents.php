@@ -22,29 +22,48 @@ class ModuleEvents
         self::setFatPayInactive();
     }
 
+    /**
+     * Inserts or activates fatpay payments
+     *
+     * @return void
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected static function insertFatPayPayment()
     {
-        if (self::hasFatPay() === false) {
-            foreach (self::$aPayments as $aPayment) {
+        foreach (self::$aPayments as $aPayment) {
+            if (self::hasFatPayPayment($aPayment['id']) === false) {
                 self::createFatPayPayment($aPayment['id'], $aPayment['desc'], $aPayment['toAmount']);
-            }
-        } else {
-            foreach (self::$aPayments as $aPayment) {
+            } else {
                 self::setPaymentActive($aPayment['id'],1);
             }
         }
     }
 
+    /**
+     * Sets fatpay payments inactive
+     *
+     * @return void
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected static function setFatPayInactive()
     {
-        if (self::hasFatPay() === true) {
-            foreach (self::$aPayments as $aPayment) {
+        foreach (self::$aPayments as $aPayment) {
+            if (self::hasFatPayPayment($aPayment['id']) === true) {
                 self::setPaymentActive($aPayment['id'],0);
             }
         }
     }
 
-    protected static function hasFatPay()
+    /**
+     * Returns true if payment found in db false otherwise
+     *
+     * @return bool
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    protected static function hasFatPayPayment($sPaymentId)
     {
         $oQueryBuilder = ContainerFactory::getInstance()
             ->getContainer()
@@ -55,13 +74,21 @@ class ModuleEvents
             ->select('oxid')
             ->from('oxpayments')
             ->where('oxid = ?')
-            ->setParameter(0, 'fatpay');
+            ->setParameter(0, $sPaymentId);
 
         $oResult = $oQueryBuilder->execute();
 
         return !empty($oResult->fetchOne());
     }
 
+    /**
+     * Sets oxactive column in oxpayments to $iValue
+     *
+     * @param $sPaymentId
+     * @param $iValue
+     * @return void
+     * @throws \Exception
+     */
     protected static function setPaymentActive($sPaymentId, $iValue)
     {
         $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
@@ -70,6 +97,15 @@ class ModuleEvents
         $oPayment->save();
     }
 
+    /**
+     * Stores payment in db
+     *
+     * @param $sId
+     * @param $sDesc
+     * @param $iToAmount
+     * @return void
+     * @throws \Exception
+     */
     protected static function createFatPayPayment($sId, $sDesc, $iToAmount)
     {
         $oPayment = oxNew(\OxidEsales\Eshop\Application\Model\Payment::class);
@@ -81,6 +117,14 @@ class ModuleEvents
         self::setDelivery($sId);
     }
 
+    /**
+     * Sets payment description
+     *
+     * @param $sOxid
+     * @param $sDesc
+     * @return void
+     * @throws \Exception
+     */
     protected static function setDescription($sOxid, $sDesc)
     {
         $oLang = \OxidEsales\Eshop\Core\Registry::getLang();
@@ -92,6 +136,13 @@ class ModuleEvents
         }
     }
 
+    /**
+     * Assigns delivery options to payment
+     *
+     * @param $sOxid
+     * @return void
+     * @throws \Exception
+     */
     protected static function setDelivery($sOxid)
     {
         $aDeliveryOptions = self::getDeliveryOptions();
@@ -111,6 +162,13 @@ class ModuleEvents
         }
     }
 
+    /**
+     * Returns array of delivery options
+     *
+     * @return mixed
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     protected static function getDeliveryOptions()
     {
         $oQueryBuilder = ContainerFactory::getInstance()
