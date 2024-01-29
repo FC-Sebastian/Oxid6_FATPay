@@ -18,21 +18,43 @@ class PaymentGatewayTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oDb->execute("DELETE FROM oxorder WHERE OXID = 'mockOrder'");
     }
 
-    public function testExecutePayment()
+    /**
+     * @dataProvider executePaymentProvider
+     */
+    public function testExecutePayment($aResponse, $blExpected)
     {
+        $oUserPayment = oxNew(\OxidEsales\Eshop\Application\Model\UserPayment::class);
+        $oUserPayment->oxuserpayments__oxpaymentsid->value = 'fatpay';
         $oOrder = oxNew(\OxidEsales\Eshop\Application\Model\Order::class);
         $oOrder->load('mockOrder');
 
         $oPaymentGateway = $this->getMockBuilder(PaymentGateway::class)->onlyMethods(['fcRedirect', 'fcGetApiResponse'])->getMock();
+        $oPaymentGateway->setPaymentParams($oUserPayment);
 
+        $oPaymentGateway->method('fcGetApiResponse')->willReturn($aResponse);
+        $this->assertEquals($blExpected ,$oPaymentGateway->executePayment(12.3, $oOrder));
+    }
+
+    public function executePaymentProvider()
+    {
+        return[
+            [['status' => 'ERROR'], false],
+            [['status' => 'APPROVED'], true]
+        ];
+    }
+
+    public function testExecutePaymentRedirect()
+    {
+        $oUserPayment = oxNew(\OxidEsales\Eshop\Application\Model\UserPayment::class);
+        $oUserPayment->oxuserpayments__oxpaymentsid->value = 'fatredirect';
+        $oOrder = oxNew(\OxidEsales\Eshop\Application\Model\Order::class);
+        $oOrder->load('mockOrder');
+
+        $oPaymentGateway = $this->getMockBuilder(PaymentGateway::class)->onlyMethods(['fcRedirect', 'fcGetApiResponse'])->getMock();
         $oPaymentGateway->method('fcRedirect')->will($this->returnCallback(function (){
             echo 'redirected';
         }));
-        $oPaymentGateway->method('fcGetApiResponse')->willReturn(['status' => 'ERROR']);
-        $this->assertFalse($oPaymentGateway->executePayment(12.3, $oOrder));
-
-        $oPaymentGateway->method('fcGetApiResponse')->willReturn(['status' => 'APPROVED']);
-        $this->assertTrue($oPaymentGateway->executePayment(12.3, $oOrder));
+        $oPaymentGateway->setPaymentParams($oUserPayment);
 
         $oPaymentGateway->method('fcGetApiResponse')->willReturn(['status' => 'REDIRECT']);
         $this->expectOutputString('redirected');
