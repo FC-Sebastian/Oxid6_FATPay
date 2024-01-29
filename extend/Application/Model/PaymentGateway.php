@@ -16,21 +16,8 @@ class PaymentGateway extends PaymentGateway_parent
         $blReturn = parent::executePayment($dAmount, $oOrder);
 
         if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
-            $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
-            $ch = curl_init($sApiUrl);
+            $aResponse = $this->fcGetApiResponse($dAmount, $oOrder);
 
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->fcGetFatPayParams($dAmount, $oOrder)));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-            $aResponse = curl_exec($ch);
-
-            if (curl_errno($ch)) {
-                Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
-            }
-
-            $aResponse = json_decode($aResponse,true);
             if ($aResponse['status'] == 'APPROVED') {
                 return true;
             } elseif ($aResponse['status'] == 'ERROR') {
@@ -38,10 +25,34 @@ class PaymentGateway extends PaymentGateway_parent
                 return false;
             } elseif ($aResponse['status'] == 'REDIRECT') {
                 $oOrder->save();
-                Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
+                $this->fcRedirect($oOrder);
             }
         }
         return $blReturn;
+    }
+
+    protected function fcRedirect($oOrder)
+    {
+        Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
+    }
+
+    protected function fcGetApiResponse($dAmount, $oOrder)
+    {
+        $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
+        $ch = curl_init($sApiUrl);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->fcGetFatPayParams($dAmount, $oOrder)));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+
+        $aResponse = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
+        }
+
+        return json_decode($aResponse,true);
     }
 
     protected function fcGetFatPayParams($dAmount, $oOrder)

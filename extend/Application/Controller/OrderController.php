@@ -18,7 +18,12 @@ class OrderController extends OrderController_parent
             $oOrder->save();
 
             $this->getSession()->setBasket($oOrder->getBasket());
-            Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');
+            $this->fcRedirect();
         }
+    }
+
+    protected function fcRedirect()
+    {
+        Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');
     }
 }

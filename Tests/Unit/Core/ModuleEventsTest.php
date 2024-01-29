@@ -9,15 +9,15 @@ class ModuleEventsTest extends \OxidEsales\TestingLibrary\UnitTestCase
     public function setUp(): void
     {
         $oDb = $this->getDb();
-        $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
+        $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay' OR OXID = 'fatredirect'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay' OR OXPAYMENTID = 'fatredirect'");
     }
 
     public function tearDown(): void
     {
         $oDb = $this->getDb();
-        $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay'");
-        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'");
+        $oDb->execute("DELETE FROM oxpayments WHERE OXID = 'fatpay' OR OXID = 'fatredirect'");
+        $oDb->execute("DELETE FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay' OR OXPAYMENTID = 'fatredirect'");
     }
 
     public function testOnActivate()
