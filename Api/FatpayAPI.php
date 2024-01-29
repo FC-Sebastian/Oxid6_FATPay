@@ -26,7 +26,12 @@ class FatpayApi
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             //setting status ERROR when lastname is 'failed'
             $aStatus['status'] = 'ERROR';
-            $aStatus['errormessage'] = 'no failures allowed';
+            if ($aData['language'] == 'de') {
+                $aStatus['errormessage'] = 'Keine failures erlaubt!';
+            } else {
+                $aStatus['errormessage'] = 'no failures allowed';
+            }
+
         }
 
         echo json_encode($aStatus);

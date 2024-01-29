@@ -7,6 +7,11 @@ use OxidEsales\EshopCommunity\Internal\Framework\Database\QueryBuilderFactoryInt
 
 class ModuleEvents
 {
+    protected static $aPayments = [
+        ['id' => 'fatpay', 'desc' => 'FATPay', 'toAmount' => 1000000],
+        ['id' => 'fatpay', 'desc' => 'FATPay', 'toAmount' => 1000000],
+    ];
+
     public static function onActivate()
     {
         self::insertFatPayPayment();
@@ -20,19 +25,22 @@ class ModuleEvents
     protected static function insertFatPayPayment()
     {
         if (self::hasFatPay() === false) {
-            self::createFatPayPayment('fatpay', 'FATPay', 1000000);
-            self::createFatPayPayment('fatredirect', 'FATRedirect', 1000000);
+            foreach (self::$aPayments as $aPayment) {
+                self::createFatPayPayment($aPayment['id'], $aPayment['desc'], $aPayment['toAmount']);
+            }
         } else {
-            self::setPaymentActive('fatpay',1);
-            self::setPaymentActive('fatredirect',1);
+            foreach (self::$aPayments as $aPayment) {
+                self::setPaymentActive($aPayment['id'],1);
+            }
         }
     }
 
     protected static function setFatPayInactive()
     {
         if (self::hasFatPay() === true) {
-            self::setPaymentActive('fatpay',0);
-            self::setPaymentActive('fatredirect',0);
+            foreach (self::$aPayments as $aPayment) {
+                self::setPaymentActive($aPayment['id'],0);
+            }
         }
     }
 
