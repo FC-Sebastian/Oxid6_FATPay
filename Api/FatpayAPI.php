@@ -1,6 +1,6 @@
 <?php
 
-namespace Fatchip\FATPay\API;
+namespace Fatchip\FATPay\Api;
 
 class FatpayApi
 {
@@ -15,7 +15,7 @@ class FatpayApi
         $this->createDb();
         $this->createTable();
 
-        $aData = json_decode(file_get_contents("php://input"),true);
+        $aData = $this->getPostData();
 
         $this->logTransaction($aData);
 
@@ -35,6 +35,11 @@ class FatpayApi
         }
 
         echo json_encode($aStatus);
+    }
+
+    public function getPostData()
+    {
+        return json_decode(file_get_contents("php://input"),true);
     }
 
     protected function createDb()

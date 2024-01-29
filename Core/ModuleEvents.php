@@ -9,7 +9,7 @@ class ModuleEvents
 {
     protected static $aPayments = [
         ['id' => 'fatpay', 'desc' => 'FATPay', 'toAmount' => 1000000],
-        ['id' => 'fatpay', 'desc' => 'FATPay', 'toAmount' => 1000000],
+        ['id' => 'fatredirect', 'desc' => 'FATRedirect', 'toAmount' => 1000000],
     ];
 
     public static function onActivate()

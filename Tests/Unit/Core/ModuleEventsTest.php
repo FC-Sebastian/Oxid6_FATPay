@@ -27,10 +27,7 @@ class ModuleEventsTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oEvents::onActivate();
 
         $this->assertEquals(1, $oDb->getOne("SELECT OXACTIVE FROM oxpayments WHERE OXID = 'fatpay'"));
-        $this->assertEquals(
-            $oDb->getOne("SELECT COUNT(OXID) FROM oxdeliveryset"),
-            $oDb->getOne("SELECT COUNT(OXID) FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'")
-        );
+        $this->assertEquals($oDb->getOne("SELECT COUNT(OXID) FROM oxdeliveryset"), $oDb->getOne("SELECT COUNT(OXID) FROM oxobject2payment WHERE OXPAYMENTID = 'fatpay'"));
     }
 
     public function testOnDeactivate()
