@@ -7,13 +7,9 @@ use OxidEsales\Eshop\Core\Registry;
 
 class OrderController extends OrderController_parent
 {
-    /**
-     * Redirects to thankyou controller
-     *
-     * @return void
-     */
-    public function fcRedirect()
+    public function fcFinalizeRedirect()
     {
-        Registry::getUtils()->redirect($this->getConfig()->getCurrentShopUrl() . '?cl=thankyou');
+        $this->getSession()->setVariable('fatRedirectVerified', true);
+        return $this->execute();
     }
 }

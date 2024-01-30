@@ -24,7 +24,7 @@ class Order extends Order_parent
 
     public function finalizeOrder(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
-        if (Registry::getSession()->getVariable('FatRedirectVerified') === true) {
+        if (Registry::getSession()->getVariable('fatRedirectVerified') === true) {
             $this->blFcFinalizeRedirect = true;
         }
 
