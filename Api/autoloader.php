@@ -1,8 +1,11 @@
 <?php
 
-
 function autoload($class)
 {
+    if (str_contains($class, '\\')) {
+        $class = substr($class, strripos($class, '\\')+1);
+    }
+
     $folders = [
         'Controller',
     ];

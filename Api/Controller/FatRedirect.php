@@ -4,7 +4,7 @@ namespace Fatchip\FATPay\Api\Controller;
 
 class FatRedirect extends ApiControllerBase
 {
-    protected $sView = 'fatredirectView';
+    protected $sView = 'fatredirect';
     protected $sTitle = 'FATRedirect Verification';
     protected $blStartsSession = true;
 
