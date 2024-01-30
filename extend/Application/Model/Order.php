@@ -2,6 +2,8 @@
 
 namespace Fatchip\FATPay\extend\Application\Model;
 
+use OxidEsales\Eshop\Core\Registry;
+
 class Order extends Order_parent
 {
     protected $blFcFinalizeRedirect = false;
@@ -18,6 +20,15 @@ class Order extends Order_parent
         if (!$this->oxorder__oxordernr->value) {
             $this->_setNumber();
         }
+    }
+
+    public function finalizeOrder(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUser, $blRecalculatingOrder = false)
+    {
+        if (Registry::getSession()->getVariable('FatRedirectVerified') === true) {
+            $this->blFcFinalizeRedirect = true;
+        }
+
+        return parent::finalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
     }
 
     protected function _checkOrderExist($sOxId = null)
@@ -51,7 +62,7 @@ class Order extends Order_parent
             parent::_loadFromBasket($oBasket);
             return;
         }
-        $this->load(\OxidEsales\Eshop\Core\Registry::getSession()->getVariable('sess_challenge'));
+        $this->load(Registry::getSession()->getVariable('sess_challenge'));
     }
 
     protected function _updateWishlist($aArticleList, $oUser)
