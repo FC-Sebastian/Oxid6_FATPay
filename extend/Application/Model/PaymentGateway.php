@@ -48,7 +48,7 @@ class PaymentGateway extends PaymentGateway_parent
      */
     public function fcRedirect($oOrder)
     {
-        Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl').'?orderId='.$oOrder->getId());
+        Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl'));
     }
 
     /**

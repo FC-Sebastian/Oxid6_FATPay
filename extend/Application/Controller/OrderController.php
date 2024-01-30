@@ -8,6 +8,12 @@ use OxidEsales\Eshop\Core\Registry;
 class OrderController extends OrderController_parent
 {
 
+    public function execute()
+    {
+        Registry::getLogger()->error(json_encode($_SESSION));
+        return parent::execute();
+    }
+
     /**
      * Redirects to thankyou controller
      *
