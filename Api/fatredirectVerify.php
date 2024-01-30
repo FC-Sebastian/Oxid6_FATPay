@@ -19,8 +19,8 @@
                         <div>
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>
-                        <input type="hidden" name="orderId" value="<?= $_REQUEST['orderId'] ?>">
-                        <input type="hidden" name="fnc" value="fcFinalizeFatRedirect">
+                        <input type="hidden" name="orderId" value="<?= $_SESSION['sess_challenge'] ?>">
+                        <input type="hidden" name="fnc" value="execute">
                     </form>
                 </div>
             </div>
