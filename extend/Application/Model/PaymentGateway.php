@@ -119,6 +119,7 @@ class PaymentGateway extends PaymentGateway_parent
         $aResponse = curl_exec($ch);
 
         Registry::getLogger()->error('PAYMENTGATEWAY UNEDITED API RESPONSE');
+        Registry::getLogger()->error($aResponse);
 
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
