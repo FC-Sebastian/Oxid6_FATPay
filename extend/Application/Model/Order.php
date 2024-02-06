@@ -28,6 +28,7 @@ class Order extends Order_parent
     {
         Registry::getLogger()->error('ORDER CHECKING FINALIZE FLAG');
         if (Registry::getSession()->getVariable('fatRedirectVerified') === true) {
+            Registry::getLogger()->error('ORDER SHOULD NOT APPEAR');
             $this->blFcFinalizeRedirect = true;
         }
 
