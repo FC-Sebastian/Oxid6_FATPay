@@ -17,11 +17,11 @@
                             <input id="birthday" name="birthday" type="date" class="form-control" required>
                         </div>
                         <input type="hidden" name="fnc" value="fcFinalizeRedirect">
-                        <input id="refererUrl" type="hidden" name="refererUrl" value="<?= urldecode($_REQUEST['refererUrl']) ?>">
                         <div>
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>
                     </form>
+                    <input id="redirectUrl" type="hidden" name="refererUrl" value="<?= urldecode($_REQUEST['redirectUrl']) ?>">
                 </div>
             </div>
         </div>

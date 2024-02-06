@@ -9,7 +9,7 @@ class OrderController extends OrderController_parent
 {
     public function fcFinalizeRedirect()
     {
-        $this->getSession()->setVariable('fatRedirectVerified', true);
+        Registry::getLogger()->error('ORDERCONTROLLER FINISH PAYMENT');
         return $this->execute();
     }
 }

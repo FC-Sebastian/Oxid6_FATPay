@@ -2,6 +2,8 @@
 
 namespace Fatchip\FATPay\extend\Application\Model;
 
+use OxidEsales\Eshop\Application\Model\UserPayment;
+use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Core\Registry;
 
 class Order extends Order_parent
@@ -24,6 +26,7 @@ class Order extends Order_parent
 
     public function finalizeOrder(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
+        Registry::getLogger()->error('ORDER CHECKING FINALIZE FLAG');
         if (Registry::getSession()->getVariable('fatRedirectVerified') === true) {
             $this->blFcFinalizeRedirect = true;
         }
@@ -65,31 +68,28 @@ class Order extends Order_parent
         $this->load(Registry::getSession()->getVariable('sess_challenge'));
     }
 
-    protected function _updateWishlist($aArticleList, $oUser)
+    protected function _executePayment(Basket $oBasket, $oUserpayment)
     {
-        if ($this->oxorder__oxpaymenttype->value != 'fatredirect' || $this->blFcFinalizeRedirect === true) {
-            parent::_updateWishlist($aArticleList, $oUser);
+        if ($this->blFcFinalizeRedirect === false) {
+            return parent::_executePayment($oBasket, $oUserpayment);
         }
+
+        if ($this->blFcFinalizeRedirect === true) {
+            // Finalize order would set a new incremented order-nr if already filled
+            // Doing this to prevent this, oxordernr will be filled again in _setNumber
+            $this->iFcOrderNr = $this->oxorder__oxordernr->value;
+            $this->oxorder__oxordernr->value = "";
+        }
+        return true;
     }
 
-    protected function _updateNoticeList($aArticleList, $oUser)
+    protected function _setPayment($sPaymentid)
     {
-        if ($this->oxorder__oxpaymenttype->value != 'fatredirect' || $this->blFcFinalizeRedirect === true) {
-            parent::_updateNoticeList($aArticleList, $oUser);
+        if ($this->blFcFinalizeRedirect === false) {
+            return parent::_setPayment($sPaymentid);
         }
-    }
-
-    protected function _markVouchers($oBasket, $oUser)
-    {
-        if ($this->oxorder__oxpaymenttype->value != 'fatredirect' || $this->blFcFinalizeRedirect === true) {
-            parent::_markVouchers($oBasket, $oUser);
-        }
-    }
-
-    protected function _sendOrderByEmail($oUser = null, $oBasket = null, $oPayment = null)
-    {
-        if ($this->oxorder__oxpaymenttype->value != 'fatredirect' || $this->blFcFinalizeRedirect === true) {
-            parent::_sendOrderByEmail($oUser. $oBasket, $oPayment);
-        }
+        $oUserpayment = oxNew(UserPayment::class);
+        $oUserpayment->load($this->oxorder__oxpaymentid->value);
+        return $oUserpayment;
     }
 }

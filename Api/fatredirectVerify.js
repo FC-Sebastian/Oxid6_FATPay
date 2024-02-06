@@ -12,7 +12,7 @@ function verify_age()
     if (((today - bday) / (1000*60*60*24*365.25)) < 18) {
         document.getElementById('error').className = '';
     } else {
-        form.action = decodeURIComponent(document.getElementById('refererUrl').value);
+        form.action = decodeURIComponent(document.getElementById('redirectUrl').value);
         form.submit();
     }
 }
