@@ -6,5 +6,4 @@ $aLang = [
     'charset'                         => 'UTF-8',
     'SHOP_MODULE_GROUP_main'          => 'API settings',
     'SHOP_MODULE_fcfatpayApiUrl'      => 'API-URL',
-    'SHOP_MODULE_fcfatpayRedirectUrl' => 'FatRedirect payment gateway'
 ];

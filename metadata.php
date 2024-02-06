@@ -44,6 +44,5 @@ $aModule = [
     ],
     'settings'    => [
         ['group' => 'main', 'name' => 'fcfatpayApiUrl', 'type' => 'str', 'value' => ''],
-        ['group' => 'main', 'name' => 'fcfatpayRedirectUrl', 'type' => 'str', 'value' => '']
     ]
 ];
