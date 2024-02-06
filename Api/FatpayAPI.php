@@ -21,25 +21,36 @@ class FatpayApi
         $this->createTable();
 
         $aData = $this->getPostData();
-
-        $this->logTransaction($aData);
+        $sTransactionId = $this->getTransactionId();
 
         $aStatus = ['status' => 'APPROVED'];
+        $sPaymentStatus = 'APPROVED';
         if ($aData['payment_type'] == 'fatredirect') {
             //setting status REDIRECT when paying with fatredirect
             $aStatus['status'] = 'REDIRECT';
+            $sPaymentStatus = 'PENDING';
+            $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl'], $sTransactionId);
+
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             //setting status ERROR when lastname is 'failed'
             $aStatus['status'] = 'ERROR';
+            $sPaymentStatus = 'DENIED';
             if ($aData['language'] == 'de') {
                 $aStatus['errormessage'] = 'Keine failures erlaubt!';
             } else {
                 $aStatus['errormessage'] = 'no failures allowed';
             }
-
         }
 
+        $this->logTransaction($aData,$sTransactionId,$sPaymentStatus);
+
         echo json_encode($aStatus);
+    }
+
+    public function getRedirectUrl($sRedirectUrl, $sTransactionId)
+    {
+        $sBase = str_replace('FatpayAPI', 'fatredirect', $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);
+        return $sBase.'?transaction='.$sTransactionId.'&redirectUrl='.urlencode($sRedirectUrl);
     }
 
     /**
@@ -74,33 +85,49 @@ class FatpayApi
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
 
-        $sQuery = 'CREATE TABLE IF NOT EXISTS '.$this->sTable.' (
-id int AUTO_INCREMENT PRIMARY KEY,
-transaction_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-shop VARCHAR(255) NOT NULL,
-shop_version VARCHAR(10) NOT NULL,
-fatpay_version VARCHAR(10) NOT NULL,
-payment_type VARCHAR(255) NOT NULL,
-language VARCHAR(4) NOT NULL,
-billing_fname VARCHAR(255),
-billing_lname VARCHAR(255),
-billing_street VARCHAR(255),
-billing_zip VARCHAR(10),
-billing_city VARCHAR(255),
-billing_country VARCHAR(255),
-shipping_fname VARCHAR(255),
-shipping_lname VARCHAR(255),
-shipping_street VARCHAR(255),
-shipping_zip VARCHAR(10),
-shipping_city VARCHAR(255),
-shipping_country VARCHAR(255),
-email VARCHAR(255),
-customer_nr VARCHAR(255),
-amount DECIMAL(8,2),
-currency VARCHAR(3)
-)';
+        $sQuery = 'CREATE TABLE IF NOT EXISTS '.$this->sTable.' (transactionId VARCHAR(255) PRIMARY KEY)';
         $oConn->query($sQuery);
         $oConn->close();
+
+        $this->addColumnfIfnotExists('transaction_timestamp', 'DATETIME DEFAULT CURRENT_TIMESTAMP');
+        $this->addColumnfIfnotExists('shop', 'VARCHAR(255) NOT NULL');
+        $this->addColumnfIfnotExists('shop_version', 'VARCHAR(10) NOT NULL');
+        $this->addColumnfIfnotExists('fatpay_version', 'VARCHAR(10) NOT NULL');
+        $this->addColumnfIfnotExists('payment_type', 'VARCHAR(255) NOT NULL');
+        $this->addColumnfIfnotExists('language', 'VARCHAR(4) NOT NULL');
+        $this->addColumnfIfnotExists('billing_fname', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('billing_lname', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('billing_street', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('billing_zip', 'VARCHAR(10)');
+        $this->addColumnfIfnotExists('billing_city', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('billing_country', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('shipping_fname', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('shipping_lname', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('shipping_street', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('shipping_zip', 'VARCHAR(10)');
+        $this->addColumnfIfnotExists('shipping_city', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('shipping_country', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('email', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('customer_nr', 'VARCHAR(255)');
+        $this->addColumnfIfnotExists('amount', 'DECIMAL(8,2)');
+        $this->addColumnfIfnotExists('currency', 'VARCHAR(3)');
+        $this->addColumnfIfnotExists('payment_status', 'VARCHAR(255)');
+    }
+
+    protected function addColumnfIfnotExists($sColumnName,$sColumnParams)
+    {
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+
+        $oResult = $oConn->query("SHOW COLUMNS FROM ".$this->sTable." LIKE '{$sColumnName}'");
+        if (!empty($oResult->num_rows)) {
+            $oConn->query("ALTER TABLE ".$this->sTable." ADD {$sColumnName} {$sColumnParams}");
+        }
+        $oConn->close();
+    }
+
+    protected function getTransactionId()
+    {
+        return md5(uniqid('', true) . '|' . microtime());
     }
 
     /**
@@ -109,10 +136,11 @@ currency VARCHAR(3)
      * @param $aData
      * @return void
      */
-    protected function logTransaction($aData)
+    protected function logTransaction($aData,$sTransactionId,$sPaymentStatus)
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
         $sQuery = 'INSERT INTO '.$this->sTable.' (
+transactionId,
 shop, 
 shop_version, 
 fatpay_version,
@@ -133,12 +161,14 @@ shipping_country,
 email,
 customer_nr,
 amount,
-currency
+currency,
+payment_status
 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
         $oStmt = $oConn->prepare($sQuery);
 
         $oStmt->bind_param(
-            'sssssssssssssssssssds',
+            'ssssssssssssssssssssdss',
+            $sTransactionId,
             $aData['shopsystem'],
             $aData['shopversion'],
             $aData['moduleversion'],
@@ -159,7 +189,8 @@ currency
             $aData['email'],
             $aData['customer_nr'],
             $aData['order_sum'],
-            $aData['currency']
+            $aData['currency'],
+            $sPaymentStatus
         );
         $oStmt->execute();
         $oConn->close();

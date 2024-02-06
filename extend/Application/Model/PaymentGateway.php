@@ -11,6 +11,13 @@ use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\Sho
 
 class PaymentGateway extends PaymentGateway_parent
 {
+    protected $aFatPayUrlCopyParameters = [
+        'stoken',
+        'sDeliveryAddressMD5',
+        'oxdownloadableproductsagreement',
+        'oxserviceproductsagreement',
+    ];
+
     /**
      * When payment is fatpay payment gets and evaluates api response otherwise returns parent::executePayment()
      *
@@ -27,6 +34,7 @@ class PaymentGateway extends PaymentGateway_parent
         if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
             $aResponse = $this->fcGetApiResponse($dAmount, $oOrder);
 
+            Registry::getLogger()->error(json_encode($aResponse));
             if ($aResponse['status'] == 'APPROVED') {
                 return true;
             } elseif ($aResponse['status'] == 'ERROR') {
@@ -34,10 +42,47 @@ class PaymentGateway extends PaymentGateway_parent
                 return false;
             } elseif ($aResponse['status'] == 'REDIRECT') {
                 $oOrder->save();
-                $this->fcRedirect($oOrder);
+                Registry::getSession()->setVariable('fatRedirected', true);
+                Registry::getLogger()->error($aResponse['redirectUrl']);
+                $this->fcRedirect($aResponse['redirectUrl']);
             }
         }
         return $blReturn;
+    }
+
+    public function fcGetRedirectUrl()
+    {
+        $sBaseUrl = Registry::getConfig()->getCurrentShopUrl().'index.php?cl=order&fnc=fcFinalizeRedirect';
+
+        return $sBaseUrl.$this->fatpayGetAdditionalParameters();
+    }
+
+    public function fatpayGetAdditionalParameters()
+    {
+        $oRequest = Registry::getRequest();
+        $oSession = Registry::getSession();
+
+        $sAddParams = '';
+
+        foreach ($this->aFatPayUrlCopyParameters as $sParamName) {
+            $sValue = $oRequest->getRequestEscapedParameter($sParamName);
+            if (!empty($sValue)) {
+                $sAddParams .= '&'.$sParamName.'='.$sValue;
+            }
+        }
+
+        $sSid = $oSession->sid(true);
+        if ($sSid != '') {
+            $sAddParams .= '&'.$sSid;
+        }
+
+        if (!$oRequest->getRequestEscapedParameter('stoken')) {
+            $sAddParams .= '&stoken='.$oSession->getSessionChallengeToken();
+        }
+        $sAddParams .= '&ord_agb=1';
+        $sAddParams .= '&rtoken='.$oSession->getRemoteAccessToken();
+
+        return $sAddParams;
     }
 
     /**
@@ -46,9 +91,10 @@ class PaymentGateway extends PaymentGateway_parent
      * @param $oOrder
      * @return void
      */
-    public function fcRedirect($oOrder)
+    public function fcRedirect($sRedirectUrl)
     {
-        Registry::getUtils()->redirect(Registry::getConfig()->getConfigParam('fcfatpayRedirectUrl'));
+        header('Location: '.$sRedirectUrl);
+        exit();
     }
 
     /**
@@ -131,6 +177,7 @@ class PaymentGateway extends PaymentGateway_parent
         $aReturn['order_sum'] = $dAmount;
         $aReturn['currency'] = $oOrder->oxorder__oxcurrency->value;
         $aReturn['payment_type'] = $oOrder->oxorder__oxpaymenttype->value;
+        $aReturn['redirectUrl'] = $this->fcGetRedirectUrl();
 
         return $aReturn;
     }
