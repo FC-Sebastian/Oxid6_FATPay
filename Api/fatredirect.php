@@ -21,7 +21,8 @@
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>
                     </form>
-                    <input id="redirectUrl" type="hidden" name="refererUrl" value="<?= urldecode($_REQUEST['redirectUrl']) ?>">
+                    <input id="redirectUrl" type="hidden" value="<?= urldecode($_REQUEST['redirectUrl']) ?>">
+                    <input id="transaction" type="hidden" value="<?= $_REQUEST['transaction'] ?>">
                 </div>
             </div>
         </div>

@@ -11,6 +11,49 @@ class FatpayApi
     public $sTable = 'transactions';
 
     /**
+     * Returns mysqli connection object
+     *
+     * @param $sServer
+     * @param $sUser
+     * @param $sPassword
+     * @param $sDb
+     * @return \mysqli|void
+     */
+    protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
+        $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
+        if ($oConn->connect_error) {
+            die(json_encode(['MySQL connection error: '.$oConn->connect_error]));
+        }
+        return $oConn;
+    }
+
+    public function getPostParam($sParam) {
+        if (isset($_POST[$sParam])) {
+            return $_POST[$sParam];
+        }
+        return null;
+    }
+
+    public function updateTransactionStatus()
+    {
+        $sTransId = $this->getPhpInput();
+
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+        $sQuery = "UPDATE ".$this->sTable." SET payment_status = 'APPROVED' WHERE transactionId = ?";
+
+
+
+        $oStmnt = $oConn->prepare($sQuery);
+        $oStmnt->bind_param('s', $sTransId);
+        $oStmnt->execute();
+    }
+
+    public function getTransactionStatus()
+    {
+        echo json_encode($_GET);
+    }
+
+    /**
      * Logs transaction then evaluates payment status and echoes it
      *
      * @return void
@@ -20,7 +63,7 @@ class FatpayApi
         $this->createDb();
         $this->createTable();
 
-        $aData = $this->getPostData();
+        $aData = json_decode($this->getPhpInput(),true);
         $sTransactionId = $this->getTransactionId();
 
         $aStatus = ['status' => 'APPROVED'];
@@ -29,7 +72,8 @@ class FatpayApi
             //setting status REDIRECT when paying with fatredirect
             $aStatus['status'] = 'REDIRECT';
             $sPaymentStatus = 'PENDING';
-            $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl'], $sTransactionId);
+            $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl']);
+            $aStatus['transactionId'] = $sTransactionId;
 
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             //setting status ERROR when lastname is 'failed'
@@ -47,10 +91,11 @@ class FatpayApi
         echo json_encode($aStatus);
     }
 
-    public function getRedirectUrl($sRedirectUrl, $sTransactionId)
+    public function getRedirectUrl($sRedirectUrl)
     {
-        $sBase = str_replace('FatpayAPI', 'fatredirect', $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']);
-        return $sBase.'?transaction='.$sTransactionId.'&redirectUrl='.urlencode($sRedirectUrl);
+        $sBase = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
+        $sBase = str_replace('FatpayAPI', 'fatredirect', $sBase);
+        return $sBase.'?redirectUrl='.urlencode($sRedirectUrl);
     }
 
     /**
@@ -58,9 +103,9 @@ class FatpayApi
      *
      * @return mixed
      */
-    public function getPostData()
+    public function getPhpInput()
     {
-        return json_decode(file_get_contents("php://input"),true);
+        return file_get_contents("php://input");
     }
 
     /**
@@ -90,6 +135,7 @@ class FatpayApi
         $oConn->close();
 
         $this->addColumnfIfnotExists('transaction_timestamp', 'DATETIME DEFAULT CURRENT_TIMESTAMP');
+        $this->addColumnfIfnotExists('order_nr', 'INT(11) NOT NULL');
         $this->addColumnfIfnotExists('shop', 'VARCHAR(255) NOT NULL');
         $this->addColumnfIfnotExists('shop_version', 'VARCHAR(10) NOT NULL');
         $this->addColumnfIfnotExists('fatpay_version', 'VARCHAR(10) NOT NULL');
@@ -119,7 +165,7 @@ class FatpayApi
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
 
         $oResult = $oConn->query("SHOW COLUMNS FROM ".$this->sTable." LIKE '{$sColumnName}'");
-        if (!empty($oResult->num_rows)) {
+        if (empty($oResult->num_rows)) {
             $oConn->query("ALTER TABLE ".$this->sTable." ADD {$sColumnName} {$sColumnParams}");
         }
         $oConn->close();
@@ -141,6 +187,7 @@ class FatpayApi
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
         $sQuery = 'INSERT INTO '.$this->sTable.' (
 transactionId,
+order_nr, 
 shop, 
 shop_version, 
 fatpay_version,
@@ -163,12 +210,15 @@ customer_nr,
 amount,
 currency,
 payment_status
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
         $oStmt = $oConn->prepare($sQuery);
 
+        echo $oConn->error;
+
         $oStmt->bind_param(
-            'ssssssssssssssssssssdss',
+            'sssssssssssssssssssssdss',
             $sTransactionId,
+            $aData['order_nr'],
             $aData['shopsystem'],
             $aData['shopversion'],
             $aData['moduleversion'],
@@ -193,29 +243,22 @@ payment_status
             $sPaymentStatus
         );
         $oStmt->execute();
-        $oConn->close();
-    }
 
-    /**
-     * Returns mysqli connection object
-     *
-     * @param $sServer
-     * @param $sUser
-     * @param $sPassword
-     * @param $sDb
-     * @return \mysqli|void
-     */
-    protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
-        $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
-        if ($oConn->connect_error) {
-            die(json_encode(['MySQL connection error: '.$oConn->connect_error]));
-        }
-        return $oConn;
+        echo $oStmt->error;
+        $oConn->close();
     }
 }
 
 if (!defined('PHP_UNIT')) {
     $oApi = new FatpayApi();
-    $oApi->validatePayment();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $oApi->validatePayment();
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+        $oApi->updateTransactionStatus();
+    } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
+        $oApi->getTransactionStatus();
+    }
+
 }
 

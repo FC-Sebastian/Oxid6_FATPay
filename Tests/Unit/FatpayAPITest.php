@@ -13,8 +13,8 @@ class FatpayAPITest extends \PHPUnit\Framework\TestCase
     public function testValidatePayment($aData, $sExpected)
     {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        $oApi = $this->getMockBuilder(\Fatchip\FATPay\Api\FatpayApi::class)->onlyMethods(['getPostData'])->getMock();
-        $oApi->method('getPostData')->willReturn($aData);
+        $oApi = $this->getMockBuilder(\Fatchip\FATPay\Api\FatpayApi::class)->onlyMethods(['getPhpInput'])->getMock();
+        $oApi->method('getPhpInput')->willReturn($aData);
         $oApi->sDb = 'fatpay_test';
 
         //asserting data was evaluated correctly
