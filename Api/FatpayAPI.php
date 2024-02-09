@@ -27,21 +27,12 @@ class FatpayApi
         return $oConn;
     }
 
-    public function getPostParam($sParam) {
-        if (isset($_POST[$sParam])) {
-            return $_POST[$sParam];
-        }
-        return null;
-    }
-
     public function updateTransactionStatus()
     {
         $sTransId = $this->getPhpInput();
 
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
         $sQuery = "UPDATE ".$this->sTable." SET payment_status = 'APPROVED' WHERE transactionId = ?";
-
-
 
         $oStmnt = $oConn->prepare($sQuery);
         $oStmnt->bind_param('s', $sTransId);
@@ -50,7 +41,21 @@ class FatpayApi
 
     public function getTransactionStatus()
     {
-        echo json_encode($_GET);
+        if (!empty($_GET['transaction'])) {
+            $sTransactionId = $_GET['transaction'];
+            $sQuery = "SELECT payment_status FROM ".$this->sTable." WHERE transactionId='$sTransactionId'";
+
+            $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+            $oResult = $oConn->query($sQuery);
+
+            $aRow = $oResult->fetch_row();
+
+            if (!empty($aRow[0])) {
+                exit((json_encode(['status' => $aRow[0]])));
+            }
+            die('TRANSACTION ID NOT FOUND');
+        }
+        die('NO TRANSACTION ID GIVEN');
     }
 
     /**

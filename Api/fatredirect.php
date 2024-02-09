@@ -16,7 +16,6 @@
                             <label for="birthday" class="form-label">Whats your birthday?</label>
                             <input id="birthday" name="birthday" type="date" class="form-control" required>
                         </div>
-                        <input type="hidden" name="fnc" value="fcFinalizeRedirect">
                         <div>
                             <input type="submit" class="btn btn-outline-secondary">
                         </div>

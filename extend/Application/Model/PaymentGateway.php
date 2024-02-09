@@ -23,7 +23,7 @@ class PaymentGateway extends PaymentGateway_parent
         if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
             $oOrder->fcSetOrderNumber();
             $oRequest = oxNew(ApiRequest::class);
-            $aResponse = $oRequest->fcGetApiResponse($dAmount, $oOrder);
+            $aResponse = $oRequest->getApiPostResponse($dAmount, $oOrder);
 
             if ($aResponse['status'] == 'APPROVED') {
                 return true;

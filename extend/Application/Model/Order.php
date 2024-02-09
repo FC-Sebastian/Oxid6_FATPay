@@ -26,9 +26,7 @@ class Order extends Order_parent
 
     public function finalizeOrder(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
-        Registry::getLogger()->error('ORDER CHECKING FINALIZE FLAG');
         if (Registry::getSession()->getVariable('fatRedirectVerified') === true) {
-            Registry::getLogger()->error('ORDER SHOULD NOT APPEAR');
             $this->blFcFinalizeRedirect = true;
         }
 

@@ -21,10 +21,10 @@ function verify_age()
 function updateTranactionStatus()
 {
     let url = window.location.protocol + '//' + window.location.host + window.location.pathname;
-    url = url.replace('fatredirect.php','FatpayAPI.php');
+    url = url.replace('fatredirect.php','FatRedirectAjax.php');
 
     let xhr = new XMLHttpRequest();
-    xhr.open('PUT', url);
+    xhr.open('POST', url);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send(document.getElementById('transaction').value);
 }

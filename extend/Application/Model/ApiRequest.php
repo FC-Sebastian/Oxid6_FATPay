@@ -43,9 +43,6 @@ class ApiRequest
 
         $aResponse = curl_exec($ch);
 
-        Registry::getLogger()->error('PAYMENTGATEWAY UNEDITED API RESPONSE');
-        Registry::getLogger()->error($aResponse);
-
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
             return ['status' => 'ERROR', 'errormessage' => 'could not reach FatPay API'];
@@ -65,9 +62,6 @@ class ApiRequest
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $aResponse = curl_exec($ch);
-
-        Registry::getLogger()->error('PAYMENTGATEWAY UNEDITED API RESPONSE');
-        Registry::getLogger()->error($aResponse);
 
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));

@@ -37,10 +37,18 @@ class OrderController extends OrderController_parent
             }
 
             $oRequest = oxNew(ApiRequest::class);
-            $sResponse = $oRequest->getApiGetResponse($sTransactionId);
+            $aResponse = $oRequest->getApiGetResponse($sTransactionId);
+
+            if ($aResponse = json_decode($aResponse, true)) {
+                if ($aResponse['status'] === 'APPROVED') {
+                    Registry::getSession()->setVariable('fatRedirectVerified', true);
+                }
+            }
         }
 
-        return $this->execute();
+        $sReturn =  $this->execute();
+        Registry::getSession()->deleteVariable('fatRedirected');
+        return $sReturn;
     }
 
     protected function fcGetCurrentOrder()
