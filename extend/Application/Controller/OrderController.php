@@ -47,7 +47,7 @@ class OrderController extends OrderController_parent
         }
 
         $sReturn =  $this->execute();
-        Registry::getSession()->deleteVariable('fatRedirected');
+        Registry::getSession()->deleteVariable('fatRedirectVerified');
         return $sReturn;
     }
 
