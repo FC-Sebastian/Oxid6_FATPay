@@ -33,7 +33,7 @@ class ApiRequest
         $ch = curl_init($sApiUrl);
 
         if (!$ch) {
-            Registry::getLogger()->error('PAYMENTGATEWAY COULDNT CONNECT TO API');
+            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -45,7 +45,7 @@ class ApiRequest
 
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
-            return ['status' => 'ERROR', 'errormessage' => 'could not reach FatPay API'];
+            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
         return json_decode($aResponse,true);
@@ -57,7 +57,7 @@ class ApiRequest
         $ch = curl_init($sApiUrl.'?transaction='.$sTransactionId);
 
         if (!$ch) {
-            Registry::getLogger()->error('PAYMENTGATEWAY COULDNT CONNECT TO API');
+            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -65,7 +65,7 @@ class ApiRequest
 
         if (curl_errno($ch)) {
             Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
-            return false;
+            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
         return $aResponse;

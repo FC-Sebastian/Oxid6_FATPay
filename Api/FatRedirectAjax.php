@@ -11,7 +11,7 @@ class FatRedirectAjax
         $ch = curl_init($this->sApiUrl);
 
         if (!$ch) {
-            Registry::getLogger()->error('PAYMENTGATEWAY COULDNT CONNECT TO API');
+            echo 'AJAX COULDNT CONNECT TO API';
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -22,11 +22,10 @@ class FatRedirectAjax
         $aResponse = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
-            return ['status' => 'ERROR', 'errormessage' => 'could not reach FatPay API'];
+            echo json_encode(['status' => 'ERROR', 'errormessage' => curl_error($ch)]);
         }
 
-        return json_decode($aResponse,true);
+        echo $aResponse;
     }
 
     public function getPostParam($sParam)
@@ -37,4 +36,9 @@ class FatRedirectAjax
         return false;
     }
 }
+if (!defined('PHP_UNIT')) {
+    $oFAtRedirect = new FatRedirectAjax();
+    $oFAtRedirect->updateTransaction();
+}
+
 

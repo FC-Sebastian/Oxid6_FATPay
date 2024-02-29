@@ -53,9 +53,9 @@ class FatpayApi
             if (!empty($aRow[0])) {
                 exit((json_encode(['status' => $aRow[0]])));
             }
-            die('TRANSACTION ID NOT FOUND');
+            die('TRANSACTION_ID_NOT_FOUND');
         }
-        die('NO TRANSACTION ID GIVEN');
+        die('NO_TRANSACTION_ID_GIVEN');
     }
 
     /**
@@ -84,11 +84,7 @@ class FatpayApi
             //setting status ERROR when lastname is 'failed'
             $aStatus['status'] = 'ERROR';
             $sPaymentStatus = 'DENIED';
-            if ($aData['language'] == 'de') {
-                $aStatus['errormessage'] = 'Keine failures erlaubt!';
-            } else {
-                $aStatus['errormessage'] = 'no failures allowed';
-            }
+            $aStatus['errormessage'] = 'NO_FAILURES';
         }
 
         $this->logTransaction($aData,$sTransactionId,$sPaymentStatus);

@@ -28,19 +28,26 @@ class OrderController extends OrderController_parent
 
             $oOrder = $this->fcGetCurrentOrder();
             if (!$oOrder) {
-                Registry::getLogger()->error('ORDERCONTROLLER ORDER NOT FOUND');
+                $this->fcRedirectWithError('ORDER_NOT_FOUND');
             }
 
             $sTransactionId = $oOrder->oxorder__oxtransid->value;
             if (empty($sTransactionId)) {
-                Registry::getLogger()->error('ORDERCONTROLELR TRANSACTION ID EMPTY');
+                $this->fcCancelCurrentOrder();
+                $this->fcRedirectWithError('TRANSACTION_ID_NOT_FOUND');
             }
 
             $oRequest = oxNew(ApiRequest::class);
             $aResponse = $oRequest->getApiGetResponse($sTransactionId);
 
             if ($aResponse = json_decode($aResponse, true)) {
-                if ($aResponse['status'] === 'APPROVED') {
+                if ($aResponse['status'] === 'ERROR') {
+                    $this->fcCancelCurrentOrder();
+                    $this->fcRedirectWithError($aResponse['errormessage']);
+                } else if ($aResponse['status'] === 'PENDING') {
+                    $this->fcCancelCurrentOrder();
+                    $this->fcRedirectWithError('TRANSACTION_PENDING');
+                } else if ($aResponse['status'] === 'APPROVED') {
                     Registry::getSession()->setVariable('fatRedirectVerified', true);
                 }
             }
@@ -77,5 +84,12 @@ class OrderController extends OrderController_parent
             }
         }
         Registry::getSession()->deleteVariable('sess_challenge');
+    }
+
+    protected function fcRedirectWithError($sErrorLangIdent)
+    {
+        Registry::getSession()->setVariable('payerror', -50);
+        Registry::getSession()->setVariable('payerrortext', Registry::getLang()->translateString($sErrorLangIdent));
+        Registry::getUtils()->redirect(Registry::getConfig()->getCurrentShopUrl().'index.php?cl=payment');
     }
 }

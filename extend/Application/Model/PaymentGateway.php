@@ -28,7 +28,7 @@ class PaymentGateway extends PaymentGateway_parent
             if ($aResponse['status'] == 'APPROVED') {
                 return true;
             } elseif ($aResponse['status'] == 'ERROR') {
-                $this->_sLastError = $aResponse['errormessage'];
+                $this->_sLastError = Registry::getLang()->translateString($aResponse['errormessage']);
                 return false;
             } elseif ($aResponse['status'] == 'REDIRECT') {
                 $oOrder->oxorder__oxtransid = new \OxidEsales\Eshop\Core\Field($aResponse['transactionId']);

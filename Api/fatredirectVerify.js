@@ -26,5 +26,5 @@ function updateTranactionStatus()
     let xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.send(document.getElementById('transaction').value);
+    xhr.send('transaction=' + document.getElementById('transaction').value);
 }
