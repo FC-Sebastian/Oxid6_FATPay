@@ -6,6 +6,11 @@ class FatRedirectAjax
 {
     protected $sApiUrl = 'http://localhost/modules/fc/fatpay/Api/FatpayAPI.php';
 
+    /**
+     * Validates whether user is 18y or older, updates transaction if yes echoes error if no
+     *
+     * @return void
+     */
     public function validateTransaction()
     {
         $iBday = $this->getPostParam('bday');
@@ -16,6 +21,11 @@ class FatRedirectAjax
         }
     }
 
+    /**
+     * updates transaction status using curl
+     *
+     * @return bool|string
+     */
     public function updateTransaction() {
         $ch = curl_init($this->sApiUrl);
 
@@ -37,6 +47,12 @@ class FatRedirectAjax
         return $aResponse;
     }
 
+    /**
+     * Gets post param via param key
+     *
+     * @param $sParam
+     * @return false|mixed
+     */
     public function getPostParam($sParam)
     {
         if (isset($_POST[$sParam])){

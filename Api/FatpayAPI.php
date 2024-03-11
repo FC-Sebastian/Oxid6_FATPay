@@ -10,6 +10,8 @@ class FatpayApi
     public $sDb = 'fatpay';
     public $sTable = 'transactions';
 
+    public $sRedirectUrl = 'http://localhost/modules/fc/fatpay/Api/fatredirect.php';
+
     /**
      * Returns mysqli connection object
      *
@@ -27,6 +29,11 @@ class FatpayApi
         return $oConn;
     }
 
+    /**
+     * Updates transaction status via given id
+     *
+     * @return void
+     */
     public function updateTransactionStatus()
     {
         $sTransId = $this->getPhpInput();
@@ -47,6 +54,11 @@ class FatpayApi
         }
     }
 
+    /**
+     * echoes transaction status via given id
+     *
+     * @return void
+     */
     public function getTransactionStatus()
     {
         if (!empty($_GET['transaction'])) {
@@ -100,11 +112,15 @@ class FatpayApi
         echo json_encode($aStatus);
     }
 
-    public function getRedirectUrl($sRedirectUrl)
+    /**
+     * returns fatredirect url with returnurl as get parameter
+     *
+     * @param $sReturnUrl
+     * @return string
+     */
+    public function getRedirectUrl($sReturnUrl)
     {
-        $sBase = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];
-        $sBase = str_replace('FatpayAPI', 'fatredirect', $sBase);
-        return $sBase.'?redirectUrl='.urlencode($sRedirectUrl);
+        return $this->sRedirectUrl.'?redirectUrl='.urlencode($sReturnUrl);
     }
 
     /**
@@ -169,6 +185,13 @@ class FatpayApi
         $this->addColumnfIfnotExists('payment_status', 'VARCHAR(255)');
     }
 
+    /**
+     * Adds db column if not exists
+     *
+     * @param $sColumnName
+     * @param $sColumnParams
+     * @return void
+     */
     protected function addColumnfIfnotExists($sColumnName,$sColumnParams)
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
@@ -180,6 +203,11 @@ class FatpayApi
         $oConn->close();
     }
 
+    /**
+     * Returns generated transaction id
+     *
+     * @return string
+     */
     protected function getTransactionId()
     {
         return md5(uniqid('', true) . '|' . microtime());

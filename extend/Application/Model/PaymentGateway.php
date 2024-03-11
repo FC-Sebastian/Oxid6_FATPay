@@ -3,7 +3,7 @@
 namespace Fatchip\FATPay\extend\Application\Model;
 
 use OxidEsales\Eshop\Core\Registry;
-use Fatchip\FATPay\extend\Application\Model\ApiRequest;
+use Fatchip\FATPay\Application\Model\ApiRequest;
 
 class PaymentGateway extends PaymentGateway_parent
 {

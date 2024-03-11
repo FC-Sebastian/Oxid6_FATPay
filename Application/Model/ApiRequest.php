@@ -1,6 +1,6 @@
 <?php
 
-namespace Fatchip\FATPay\extend\Application\Model;
+namespace Fatchip\FATPay\Application\Model;
 
 use OxidEsales\Eshop\Application\Model\User;
 use OxidEsales\Eshop\Core\Registry;
@@ -50,7 +50,13 @@ class ApiRequest
 
         return json_decode($aResponse,true);
     }
-    
+
+    /**
+     * Gets transaction status from api via transaction id
+     *
+     * @param $sTransactionId
+     * @return bool|string|string[]
+     */
     public function getApiGetResponse($sTransactionId)
     {
         $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
@@ -143,6 +149,11 @@ class ApiRequest
             ->get()->getModuleConfiguration('fcfatpay')->getVersion();
     }
 
+    /**
+     * Returns return url for fatredirect
+     *
+     * @return string
+     */
     public function fcGetReturnUrl()
     {
         $sBaseUrl = Registry::getConfig()->getCurrentShopUrl().'index.php?cl=order&fnc=fcFinalizeRedirect';
@@ -150,6 +161,11 @@ class ApiRequest
         return $sBaseUrl.$this->getAdditionalUrlParameters();
     }
 
+    /**
+     * Returns additional url parameters for checkout
+     *
+     * @return string
+     */
     public function getAdditionalUrlParameters()
     {
         $oRequest = Registry::getRequest();

@@ -2,7 +2,7 @@
 
 namespace Fatchip\FATPay\extend\Application\Controller;
 
-use Fatchip\FATPay\extend\Application\Model\ApiRequest;
+use Fatchip\FATPay\Application\Model\ApiRequest;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Registry;
 
@@ -19,6 +19,11 @@ class OrderController extends OrderController_parent
         return parent::render();
     }
 
+    /**
+     * Finishes fatredirect payment
+     *
+     * @return string|null
+     */
     public function fcFinalizeRedirect()
     {
         $sPaymentId = $this->getPayment()->getId();
@@ -58,6 +63,11 @@ class OrderController extends OrderController_parent
         return $sReturn;
     }
 
+    /**
+     * Loads order via session and returns it
+     *
+     * @return false|mixed|Order
+     */
     protected function fcGetCurrentOrder()
     {
         $sOrderId = Registry::getSession()->getVariable('sess_challenge');
@@ -73,6 +83,11 @@ class OrderController extends OrderController_parent
         return false;
     }
 
+    /**
+     * Cancels order via session and deletes sess_challange
+     *
+     * @return void
+     */
     protected function fcCancelCurrentOrder()
     {
         $sSessChallenge = Registry::getSession()->getVariable('sess_challenge');
@@ -86,9 +101,15 @@ class OrderController extends OrderController_parent
         Registry::getSession()->deleteVariable('sess_challenge');
     }
 
+    /**
+     * Redirects to payment page with error
+     *
+     * @param $sErrorLangIdent
+     * @return void
+     */
     protected function fcRedirectWithError($sErrorLangIdent)
     {
-        Registry::getSession()->setVariable('payerror', -50);
+        Registry::getSession()->setVariable('payerror', -69);
         Registry::getSession()->setVariable('payerrortext', Registry::getLang()->translateString($sErrorLangIdent));
         Registry::getUtils()->redirect(Registry::getConfig()->getCurrentShopUrl().'index.php?cl=payment');
     }

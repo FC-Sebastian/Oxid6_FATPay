@@ -24,6 +24,14 @@ class Order extends Order_parent
         }
     }
 
+    /**
+     * Finalizes order, sets session flag if fatredirect payment verified
+     *
+     * @param Basket $oBasket
+     * @param $oUser
+     * @param $blRecalculatingOrder
+     * @return bool|int
+     */
     public function finalizeOrder(\OxidEsales\Eshop\Application\Model\Basket $oBasket, $oUser, $blRecalculatingOrder = false)
     {
         if (Registry::getSession()->getVariable('fatRedirectVerified') === true) {
@@ -33,6 +41,12 @@ class Order extends Order_parent
         return parent::finalizeOrder($oBasket, $oUser, $blRecalculatingOrder);
     }
 
+    /**
+     * Returns false if fatredirect session flag is set otherwise calls parent method
+     *
+     * @param $sOxId
+     * @return bool
+     */
     protected function _checkOrderExist($sOxId = null)
     {
         if ($this->blFcFinalizeRedirect === true) {
@@ -41,6 +55,10 @@ class Order extends Order_parent
         return parent::_checkOrderExist($sOxId);
     }
 
+    /**
+     * Sets order number and returns true if fatredirect session flag is set otherwise calls parent method
+     *
+     */
     protected function _setNumber()
     {
         if ($this->blFcFinalizeRedirect === false) {
@@ -50,6 +68,12 @@ class Order extends Order_parent
         return true;
     }
 
+    /**
+     * Not setting orderstatus for fatredirect when session flag is not set otherwise calls parent method
+     *
+     * @param $sStatus
+     * @return void
+     */
     protected function _setOrderStatus($sStatus)
     {
         if ($this->oxorder__oxpaymenttype->value == 'fatredirect' && $this->oxorder__oxtransstatus->value == "NOT_FINISHED" && $this->blFcFinalizeRedirect === false) {
@@ -58,6 +82,12 @@ class Order extends Order_parent
         parent::_setOrderStatus($sStatus);
     }
 
+    /**
+     * Loading order from sess_challenge if fatredirect session flag is set otherwise calls parent method
+     *
+     * @param Basket $oBasket
+     * @return void
+     */
     protected function _loadFromBasket(\OxidEsales\Eshop\Application\Model\Basket $oBasket)
     {
         if ($this->blFcFinalizeRedirect === false) {
@@ -67,6 +97,13 @@ class Order extends Order_parent
         $this->load(Registry::getSession()->getVariable('sess_challenge'));
     }
 
+    /**
+     * Executing payment when fatredirect session flag is not set otherwise storing order number
+     *
+     * @param Basket $oBasket
+     * @param $oUserpayment
+     * @return bool|int
+     */
     protected function _executePayment(Basket $oBasket, $oUserpayment)
     {
         if ($this->blFcFinalizeRedirect === false) {
@@ -82,6 +119,12 @@ class Order extends Order_parent
         return true;
     }
 
+    /**
+     * Loading payment from order if fatredirect session flag is set otherwise calls parent method
+     *
+     * @param $sPaymentid
+     * @return mixed|UserPayment|null
+     */
     protected function _setPayment($sPaymentid)
     {
         if ($this->blFcFinalizeRedirect === false) {
