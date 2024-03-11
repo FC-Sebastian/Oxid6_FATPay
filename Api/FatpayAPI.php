@@ -22,7 +22,7 @@ class FatpayApi
     protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
         $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
         if ($oConn->connect_error) {
-            die(json_encode(['MySQL connection error: '.$oConn->connect_error]));
+            die(json_encode(['status' => 'ERROR','errormessage' => $oConn->connect_error]));
         }
         return $oConn;
     }
@@ -37,6 +37,14 @@ class FatpayApi
         $oStmnt = $oConn->prepare($sQuery);
         $oStmnt->bind_param('s', $sTransId);
         $oStmnt->execute();
+
+        if ($oStmnt->error) {
+            echo json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error trying to update transaction']);
+        } elseif ($oStmnt->affected_rows === 0) {
+            echo json_encode(['status' => 'ERROR', 'errormessage' => 'Couldn\'t find transaction']);
+        } else {
+            echo json_encode(['status' => 'SUCCESS']);
+        }
     }
 
     public function getTransactionStatus()

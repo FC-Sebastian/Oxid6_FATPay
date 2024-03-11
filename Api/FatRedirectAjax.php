@@ -6,12 +6,21 @@ class FatRedirectAjax
 {
     protected $sApiUrl = 'http://localhost/modules/fc/fatpay/Api/FatpayAPI.php';
 
-    public function updateTransaction()
+    public function validateTransaction()
     {
+        $iBday = $this->getPostParam('bday');
+        if (strtotime('+18 years',strtotime($iBday)) < time() || strtotime($iBday) < 0) {
+            echo $this->updateTransaction();
+        } else {
+            echo json_encode(['status' => 'ERROR', 'errormessage' => 'You must be of age to pay with FatRedirect']);
+        }
+    }
+
+    public function updateTransaction() {
         $ch = curl_init($this->sApiUrl);
 
         if (!$ch) {
-            echo 'AJAX COULDNT CONNECT TO API';
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'AJAX couldn\'t connect to API']);
         }
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -22,10 +31,10 @@ class FatRedirectAjax
         $aResponse = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            echo json_encode(['status' => 'ERROR', 'errormessage' => curl_error($ch)]);
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error when communication with API']);
         }
 
-        echo $aResponse;
+        return $aResponse;
     }
 
     public function getPostParam($sParam)
@@ -38,7 +47,7 @@ class FatRedirectAjax
 }
 if (!defined('PHP_UNIT')) {
     $oFAtRedirect = new FatRedirectAjax();
-    $oFAtRedirect->updateTransaction();
+    $oFAtRedirect->validateTransaction();
 }
 
 
