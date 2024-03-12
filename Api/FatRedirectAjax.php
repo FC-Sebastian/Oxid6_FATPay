@@ -5,6 +5,7 @@ namespace Fatchip\FATPay\Api;
 class FatRedirectAjax
 {
     protected $sApiUrl = 'http://localhost/modules/fc/fatpay/Api/FatpayAPI.php';
+    protected $ch = null;
 
     /**
      * Validates whether user is 18y or older, updates transaction if yes echoes error if no
@@ -14,7 +15,7 @@ class FatRedirectAjax
     public function validateTransaction()
     {
         $iBday = $this->getPostParam('bday');
-        if (strtotime('+18 years',strtotime($iBday)) < time() || strtotime($iBday) < 0) {
+        if (strtotime('+18 years',strtotime($iBday)) < time()) {
             echo $this->updateTransaction();
         } else {
             echo json_encode(['status' => 'ERROR', 'errormessage' => 'You must be of age to pay with FatRedirect']);
@@ -27,24 +28,66 @@ class FatRedirectAjax
      * @return bool|string
      */
     public function updateTransaction() {
-        $ch = curl_init($this->sApiUrl);
+        $this->ch = $this->getApi();
 
-        if (!$ch) {
-            return json_encode(['status' => 'ERROR', 'errormessage' => 'AJAX couldn\'t connect to API']);
+        if (!$this->ch) {
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'Couldn\'t connect to API']);
         }
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->getPostParam('transaction'));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $this->setApiOption(CURLOPT_RETURNTRANSFER, true);
+        $this->setApiOption(CURLOPT_CUSTOMREQUEST, 'PUT');
+        $this->setApiOption(CURLOPT_POSTFIELDS, $this->getPostParam('transaction'));
+        $this->setApiOption(CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
-        $aResponse = curl_exec($ch);
+        $aResponse = $this->executeApiRequest();
 
-        if (curl_errno($ch)) {
-            return json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error when communication with API']);
+        if ($this->getApiError()) {
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error when communicating with the API']);
         }
 
         return $aResponse;
+    }
+
+    /**
+     * Returns cURL handle
+     *
+     * @return false|CurlHandle
+     */
+    public function getApi()
+    {
+        return curl_init($this->sApiUrl);
+    }
+
+    /**
+     * Sets cURL option
+     *
+     * @param $sName
+     * @param $value
+     * @return void
+     */
+    public function setApiOption($sName, $value)
+    {
+        curl_setopt($this->ch, $sName, $value);
+    }
+
+    /**
+     * Executes cURL request
+     *
+     * @return bool|string
+     */
+    public function executeApiRequest()
+    {
+        return curl_exec($this->ch);
+    }
+
+    /**
+     * Returns cURL error code
+     *
+     * @return int
+     */
+    public function getApiError()
+    {
+        return curl_errno($this->ch);
     }
 
     /**

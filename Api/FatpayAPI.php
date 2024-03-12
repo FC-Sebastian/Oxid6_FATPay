@@ -13,49 +13,7 @@ class FatpayApi
     public $sRedirectUrl = 'http://localhost/modules/fc/fatpay/Api/fatredirect.php';
 
     /**
-     * Returns mysqli connection object
-     *
-     * @param $sServer
-     * @param $sUser
-     * @param $sPassword
-     * @param $sDb
-     * @return \mysqli|void
-     */
-    protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
-        $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
-        if ($oConn->connect_error) {
-            die(json_encode(['status' => 'ERROR','errormessage' => $oConn->connect_error]));
-        }
-        return $oConn;
-    }
-
-    /**
-     * Updates transaction status via given id
-     *
-     * @return void
-     */
-    public function updateTransactionStatus()
-    {
-        $sTransId = $this->getPhpInput();
-
-        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
-        $sQuery = "UPDATE ".$this->sTable." SET payment_status = 'APPROVED' WHERE transactionId = ?";
-
-        $oStmnt = $oConn->prepare($sQuery);
-        $oStmnt->bind_param('s', $sTransId);
-        $oStmnt->execute();
-
-        if ($oStmnt->error) {
-            echo json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error trying to update transaction']);
-        } elseif ($oStmnt->affected_rows === 0) {
-            echo json_encode(['status' => 'ERROR', 'errormessage' => 'Couldn\'t find transaction']);
-        } else {
-            echo json_encode(['status' => 'SUCCESS']);
-        }
-    }
-
-    /**
-     * echoes transaction status via given id
+     * Echoes transaction status via given id
      *
      * @return void
      */
@@ -63,7 +21,7 @@ class FatpayApi
     {
         if (!empty($_GET['transaction'])) {
             $sTransactionId = $_GET['transaction'];
-            $sQuery = "SELECT payment_status FROM ".$this->sTable." WHERE transactionId='$sTransactionId'";
+            $sQuery = "SELECT payment_status FROM $this->sTable WHERE transactionId='$sTransactionId'";
 
             $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
             $oResult = $oConn->query($sQuery);
@@ -71,11 +29,11 @@ class FatpayApi
             $aRow = $oResult->fetch_row();
 
             if (!empty($aRow[0])) {
-                exit((json_encode(['status' => $aRow[0]])));
+                $this->terminate(json_encode(['status' => $aRow[0]]));
             }
-            die('TRANSACTION_ID_NOT_FOUND');
+            $this->terminate('TRANSACTION_ID_NOT_FOUND');
         }
-        die('NO_TRANSACTION_ID_GIVEN');
+        $this->terminate('NO_TRANSACTION_ID_GIVEN');
     }
 
     /**
@@ -113,7 +71,59 @@ class FatpayApi
     }
 
     /**
-     * returns fatredirect url with returnurl as get parameter
+     * Updates transaction status via given id
+     *
+     * @return void
+     */
+    public function updateTransactionStatus()
+    {
+        $sTransId = $this->getPhpInput();
+
+        $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
+        $sQuery = "UPDATE $this->sTable SET payment_status = 'APPROVED' WHERE transactionId = ?";
+
+        $oStmnt = $oConn->prepare($sQuery);
+        $oStmnt->bind_param('s', $sTransId);
+        $oStmnt->execute();
+
+        if ($oStmnt->error) {
+            echo json_encode(['status' => 'ERROR', 'errormessage' => 'There was an error trying to update transaction']);
+        } elseif ($oStmnt->affected_rows === 0) {
+            echo json_encode(['status' => 'ERROR', 'errormessage' => 'Couldn\'t find transaction']);
+        } else {
+            echo json_encode(['status' => 'SUCCESS']);
+        }
+    }
+
+    /**
+     * Calls die(), used for testing
+     *
+     * @param $sMessage
+     * @return void
+     */
+    public function terminate($sMessage){
+        die($sMessage);
+    }
+
+    /**
+     * Returns mysqli connection object
+     *
+     * @param $sServer
+     * @param $sUser
+     * @param $sPassword
+     * @param $sDb
+     * @return \mysqli|void
+     */
+    protected function getMysqliConnection($sServer, $sUser, $sPassword, $sDb = null) {
+        $oConn = new \mysqli($sServer, $sUser, $sPassword, $sDb);
+        if ($oConn->connect_error) {
+            die(json_encode(['status' => 'ERROR','errormessage' => $oConn->connect_error]));
+        }
+        return $oConn;
+    }
+
+    /**
+     * Returns fatredirect url with return url as get parameter
      *
      * @param $sReturnUrl
      * @return string
@@ -138,7 +148,7 @@ class FatpayApi
      *
      * @return void
      */
-    protected function createDb()
+    public function createDb()
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword);
         $sQuery = 'CREATE DATABASE IF NOT EXISTS '.$this->sDb;
@@ -151,7 +161,7 @@ class FatpayApi
      *
      * @return void
      */
-    protected function createTable()
+    public function createTable()
     {
         $oConn = $this->getMysqliConnection($this->sServer, $this->sUser, $this->sPassword, $this->sDb);
 

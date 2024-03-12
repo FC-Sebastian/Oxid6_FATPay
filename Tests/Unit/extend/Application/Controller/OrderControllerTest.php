@@ -11,7 +11,6 @@ class OrderControllerTest extends \OxidEsales\TestingLibrary\UnitTestCase
     {
         $oDb = $this->getDb();
         $oDb->execute("INSERT INTO oxorder (oxid) VALUES ('mockOrder')");
-        $_POST['orderId'] = 'mockOrder';
     }
 
     public function tearDown(): void
@@ -20,14 +19,59 @@ class OrderControllerTest extends \OxidEsales\TestingLibrary\UnitTestCase
         $oDb->execute("DELETE FROM oxorder WHERE OXID = 'mockOrder'");
     }
 
-    public function testFcFinalizeFatRedirect()
+    /**
+     * @dataProvider fcFinalizeRedirectProvider
+     *
+     * @param $sId
+     * @param $sTransaction
+     * @param $aResponse
+     * @param $blCancel
+     * @param $blRedirect
+     * @param $blExecute
+     * @return void
+     */
+    public function testFcFinalizeFatRedirect($sId, $sTransaction, $aResponse, $blCancel, $blRedirect, $blExecute)
     {
-        $oOrderController = $this->getMockBuilder(OrderController::class)->onlyMethods(['fcRedirect'])->getMock();
-        $oOrderController->fcFinalizeFatRedirect();
+        if ($sId && $sTransaction) {
+            $oOrder = oxNew(Order::class);
+            $oOrder->load($sId);
+            $oOrder->oxorder__oxtransid->value = $sTransaction;
+            $oOrder->save();
+        }
 
-        $oOrder = oxNew(Order::class);
-        $oOrder->load('mockOrder');
+        $oOrderController = $this
+            ->getMockBuilder(OrderController::class)
+            ->onlyMethods(['fcCancelCurrentOrder','fcRedirectWithError', 'getApiResponse', 'execute'])
+            ->getMock();
+        $oOrderController->method('getApiResponse')->willReturn($aResponse);
 
-        $this->assertEquals('OK', $oOrder->oxorder__oxtransstatus->value);
+        if ($blCancel) {
+            $oOrderController->expects($this->once())->method('fcCancelCurrentOrder');
+        }
+        if ($blRedirect) {
+            $oOrderController->expects($this->once())->method('fcRedirectWithError');
+        }
+        if ($blExecute) {
+            $oOrderController->expects($this->once())->method('execute');
+        }
+
+        \OxidEsales\Eshop\Core\Registry::getSession()->setVariable('sess_challange', $sId);
+        $oOrderController->fcFinalizeRedirect();
+    }
+
+    public function fcFinalizeRedirectProvider()
+    {
+        return [
+            //testing approved response
+            ['mockOrder','1234', json_encode(['status' => 'APPROVED']), false, false, true],
+            //testing pending response
+            ['mockOrder','1234', json_encode(['status' => 'PENDING']), true, true, false],
+            //testing error response
+            ['mockOrder','1234', json_encode(['status' => 'ERROR']), true, true, false],
+            //testing empty transaction id
+            ['mockOrder', false, false, true, true, false],
+            //testing order not found
+            [false, false, false, false, true, false],
+        ];
     }
 }

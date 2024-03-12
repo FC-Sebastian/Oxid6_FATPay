@@ -22,8 +22,7 @@ class PaymentGateway extends PaymentGateway_parent
 
         if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
             $oOrder->fcSetOrderNumber();
-            $oRequest = oxNew(ApiRequest::class);
-            $aResponse = $oRequest->getApiPostResponse($dAmount, $oOrder);
+            $aResponse = $this->fcGetApiResponse($dAmount, $oOrder);
 
             if ($aResponse['status'] == 'APPROVED') {
                 return true;
@@ -38,6 +37,12 @@ class PaymentGateway extends PaymentGateway_parent
             }
         }
         return $blReturn;
+    }
+
+    public function fcGetApiResponse($dAmount, $oOrder)
+    {
+        $oRequest = oxNew(ApiRequest::class);
+        return $oRequest->getApiPostResponse($dAmount, $oOrder);
     }
 
     /**

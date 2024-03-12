@@ -8,7 +8,7 @@ use OxidEsales\Eshop\Core\Registry;
 
 class Order extends Order_parent
 {
-    protected $blFcFinalizeRedirect = false;
+    public $blFcFinalizeRedirect = false;
 
     protected $iFcOrderNr;
 

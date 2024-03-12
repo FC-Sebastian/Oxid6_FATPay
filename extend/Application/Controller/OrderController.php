@@ -42,9 +42,7 @@ class OrderController extends OrderController_parent
                 $this->fcRedirectWithError('TRANSACTION_ID_NOT_FOUND');
             }
 
-            $oRequest = oxNew(ApiRequest::class);
-            $aResponse = $oRequest->getApiGetResponse($sTransactionId);
-
+            $aResponse = $this->getApiResponse($sTransactionId);
             if ($aResponse = json_decode($aResponse, true)) {
                 if ($aResponse['status'] === 'ERROR') {
                     $this->fcCancelCurrentOrder();
@@ -55,12 +53,21 @@ class OrderController extends OrderController_parent
                 } else if ($aResponse['status'] === 'APPROVED') {
                     Registry::getSession()->setVariable('fatRedirectVerified', true);
                 }
+            } else {
+                $this->fcCancelCurrentOrder();
+                $this->fcRedirectWithError('COULDNT_CONNECT_TO_API');
             }
         }
 
         $sReturn =  $this->execute();
         Registry::getSession()->deleteVariable('fatRedirectVerified');
         return $sReturn;
+    }
+
+    public function getApiResponse($sTransactionId)
+    {
+        $oRequest = oxNew(ApiRequest::class);
+        return $oRequest->getApiGetResponse($sTransactionId);
     }
 
     /**

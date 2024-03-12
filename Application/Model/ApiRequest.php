@@ -17,6 +17,7 @@ class ApiRequest
         'oxdownloadableproductsagreement',
         'oxserviceproductsagreement',
     ];
+    protected $ch = null;
 
     /**
      * Sends order data to api and returns response
@@ -30,21 +31,21 @@ class ApiRequest
     public function getApiPostResponse($dAmount, $oOrder)
     {
         $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
-        $ch = curl_init($sApiUrl);
+        $this->ch = $this->getApi($sApiUrl);
 
-        if (!$ch) {
+        if (!$this->ch) {
             return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->getFatPayParams($dAmount, $oOrder)));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        $this->setApiOption(CURLOPT_RETURNTRANSFER, true);
+        $this->setApiOption(CURLOPT_POST, true);
+        $this->setApiOption(CURLOPT_POSTFIELDS, json_encode($this->getFatPayParams($dAmount, $oOrder)));
+        $this->setApiOption(CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
 
-        $aResponse = curl_exec($ch);
+        $aResponse = $this->executeApiRequest();
 
-        if (curl_errno($ch)) {
-            Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
+        if ($this->getApiErrorCode()) {
+            $this->logApiError($this->getApiError());
             return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
         }
 
@@ -60,21 +61,118 @@ class ApiRequest
     public function getApiGetResponse($sTransactionId)
     {
         $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
-        $ch = curl_init($sApiUrl.'?transaction='.$sTransactionId);
+        $this->ch = $this->getApi($sApiUrl.'?transaction='.$sTransactionId);
 
-        if (!$ch) {
-            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
+        if (!$this->ch) {
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API']);
         }
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $aResponse = curl_exec($ch);
+        $this->setApiOption( CURLOPT_RETURNTRANSFER, true);
+        $aResponse = $this->executeApiRequest();
 
-        if (curl_errno($ch)) {
-            Registry::getLogger()->error('FatPay curl error: '.curl_error($ch));
-            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
+        if ($this->getApiErrorCode()) {
+            $this->logApiError($this->getApiError());
+            return json_encode(['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API']);
         }
 
         return $aResponse;
+    }
+
+    public function logApiError($sError)
+    {
+        Registry::getLogger()->error('FatPay curl error: '.$sError);
+    }
+
+    /**
+     * Returns return url for fatredirect
+     *
+     * @return string
+     */
+    public function fcGetReturnUrl()
+    {
+        $sBaseUrl = Registry::getConfig()->getCurrentShopUrl().'index.php?cl=order&fnc=fcFinalizeRedirect';
+
+        return $sBaseUrl.$this->getAdditionalUrlParameters();
+    }
+
+    /**
+     * Returns additional url parameters for checkout
+     *
+     * @return string
+     */
+    public function getAdditionalUrlParameters()
+    {
+        $oRequest = Registry::getRequest();
+        $oSession = Registry::getSession();
+
+        $sAddParams = '';
+
+        foreach ($this->aFatPayUrlCopyParameters as $sParamName) {
+            $sValue = $oRequest->getRequestEscapedParameter($sParamName);
+            if (!empty($sValue)) {
+                $sAddParams .= '&'.$sParamName.'='.$sValue;
+            }
+        }
+
+        $sSid = $oSession->sid(true);
+        if ($sSid != '') {
+            $sAddParams .= '&'.$sSid;
+        }
+
+        if (!$oRequest->getRequestEscapedParameter('stoken')) {
+            $sAddParams .= '&stoken='.$oSession->getSessionChallengeToken();
+        }
+        $sAddParams .= '&ord_agb=1';
+        $sAddParams .= '&rtoken='.$oSession->getRemoteAccessToken();
+
+        return $sAddParams;
+    }
+
+    /**
+     * Returns cURL handle
+     *
+     * @return false|CurlHandle
+     */
+    public function getApi($sApiUrl)
+    {
+        return curl_init($sApiUrl);
+    }
+
+    /**
+     * Sets cURL option
+     *
+     * @param $sName
+     * @param $value
+     * @return void
+     */
+    public function setApiOption($sName, $value)
+    {
+        curl_setopt($this->ch, $sName, $value);
+    }
+
+    /**
+     * Executes cURL request
+     *
+     * @return bool|string
+     */
+    public function executeApiRequest()
+    {
+        return curl_exec($this->ch);
+    }
+
+    /**
+     * Returns cURL error code
+     *
+     * @return int
+     */
+    public function getApiErrorCode()
+    {
+        return curl_errno($this->ch);
+    }
+
+    public function getApiError()
+    {
+        return curl_error($this->ch);
     }
 
     /**
@@ -147,50 +245,5 @@ class ApiRequest
             ->getContainer()
             ->get(ShopConfigurationDaoBridgeInterface::class)
             ->get()->getModuleConfiguration('fcfatpay')->getVersion();
-    }
-
-    /**
-     * Returns return url for fatredirect
-     *
-     * @return string
-     */
-    public function fcGetReturnUrl()
-    {
-        $sBaseUrl = Registry::getConfig()->getCurrentShopUrl().'index.php?cl=order&fnc=fcFinalizeRedirect';
-
-        return $sBaseUrl.$this->getAdditionalUrlParameters();
-    }
-
-    /**
-     * Returns additional url parameters for checkout
-     *
-     * @return string
-     */
-    public function getAdditionalUrlParameters()
-    {
-        $oRequest = Registry::getRequest();
-        $oSession = Registry::getSession();
-
-        $sAddParams = '';
-
-        foreach ($this->aFatPayUrlCopyParameters as $sParamName) {
-            $sValue = $oRequest->getRequestEscapedParameter($sParamName);
-            if (!empty($sValue)) {
-                $sAddParams .= '&'.$sParamName.'='.$sValue;
-            }
-        }
-
-        $sSid = $oSession->sid(true);
-        if ($sSid != '') {
-            $sAddParams .= '&'.$sSid;
-        }
-
-        if (!$oRequest->getRequestEscapedParameter('stoken')) {
-            $sAddParams .= '&stoken='.$oSession->getSessionChallengeToken();
-        }
-        $sAddParams .= '&ord_agb=1';
-        $sAddParams .= '&rtoken='.$oSession->getRemoteAccessToken();
-
-        return $sAddParams;
     }
 }
