@@ -5,6 +5,7 @@ namespace Fatchip\FATPay\extend\Application\Model;
 use OxidEsales\Eshop\Application\Model\UserPayment;
 use OxidEsales\Eshop\Application\Model\Basket;
 use OxidEsales\Eshop\Core\Registry;
+use Fatchip\FATPay\Application\Model\FatPayHelper;
 
 class Order extends Order_parent
 {
@@ -76,7 +77,7 @@ class Order extends Order_parent
      */
     protected function _setOrderStatus($sStatus)
     {
-        if ($this->oxorder__oxpaymenttype->value == 'fatredirect' && $this->oxorder__oxtransstatus->value == "NOT_FINISHED" && $this->blFcFinalizeRedirect === false) {
+        if ($this->isFatRedirect($this->oxorder__oxpaymenttype->value) && $this->oxorder__oxtransstatus->value == "NOT_FINISHED" && $this->blFcFinalizeRedirect === false) {
             return;
         }
         parent::_setOrderStatus($sStatus);

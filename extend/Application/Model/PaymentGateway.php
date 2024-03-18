@@ -4,6 +4,7 @@ namespace Fatchip\FATPay\extend\Application\Model;
 
 use OxidEsales\Eshop\Core\Registry;
 use Fatchip\FATPay\Application\Model\ApiRequest;
+use Fatchip\FATPay\Application\Model\FatPayHelper;
 
 class PaymentGateway extends PaymentGateway_parent
 {
@@ -20,7 +21,7 @@ class PaymentGateway extends PaymentGateway_parent
     {
         $blReturn = parent::executePayment($dAmount, $oOrder);
 
-        if ($this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatpay' || $this->_oPaymentInfo->oxuserpayments__oxpaymentsid->value == 'fatredirect') {
+        if ($this->isFatPayPayment($oOrder->oxorder__oxpaymenttype->value)) {
             $oOrder->fcSetOrderNumber();
             $aResponse = $this->fcGetApiResponse($dAmount, $oOrder);
 
@@ -33,7 +34,7 @@ class PaymentGateway extends PaymentGateway_parent
                 $oOrder->oxorder__oxtransid = new \OxidEsales\Eshop\Core\Field($aResponse['transactionId']);
                 $oOrder->save();
                 Registry::getSession()->setVariable('fatRedirected', true);
-                $this->fcRedirect($aResponse['redirectUrl'].'&transaction='.$aResponse['transactionId']);
+                $this->fcRedirect($aResponse['redirectUrl']);
             }
         }
         return $blReturn;

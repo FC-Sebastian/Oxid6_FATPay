@@ -5,6 +5,7 @@ namespace Fatchip\FATPay\extend\Application\Controller;
 use Fatchip\FATPay\Application\Model\ApiRequest;
 use OxidEsales\Eshop\Application\Model\Order;
 use OxidEsales\Eshop\Core\Registry;
+use Fatchip\FATPay\Application\Model\FatPayHelper;
 
 class OrderController extends OrderController_parent
 {
@@ -28,7 +29,7 @@ class OrderController extends OrderController_parent
     {
         $sPaymentId = $this->getPayment()->getId();
 
-        if ($sPaymentId === 'fatredirect') {
+        if ($this->isFatRedirect($sPaymentId)) {
             Registry::getSession()->deleteVariable('fatRedirected');
 
             $oOrder = $this->fcGetCurrentOrder();
@@ -57,6 +58,9 @@ class OrderController extends OrderController_parent
                 $this->fcCancelCurrentOrder();
                 $this->fcRedirectWithError('COULDNT_CONNECT_TO_API');
             }
+        } else {
+            $this->fcCancelCurrentOrder();
+            $this->fcRedirectWithError('INVALID_PAYMENTTYPE');
         }
 
         $sReturn =  $this->execute();

@@ -8,6 +8,7 @@ use OxidEsales\Eshop\Core\ShopVersion;
 use OxidEsales\Eshop\Core\ViewConfig;
 use OxidEsales\EshopCommunity\Internal\Container\ContainerFactory;
 use OxidEsales\EshopCommunity\Internal\Framework\Module\Configuration\Bridge\ShopConfigurationDaoBridgeInterface;
+use Fatchip\FATPay\Application\Model\CurlHelper;
 
 class ApiRequest
 {
@@ -30,26 +31,8 @@ class ApiRequest
      */
     public function getApiPostResponse($dAmount, $oOrder)
     {
-        $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
-        $this->ch = $this->getApi($sApiUrl);
-
-        if (!$this->ch) {
-            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
-        }
-
-        $this->setApiOption(CURLOPT_RETURNTRANSFER, true);
-        $this->setApiOption(CURLOPT_POST, true);
-        $this->setApiOption(CURLOPT_POSTFIELDS, json_encode($this->getFatPayParams($dAmount, $oOrder)));
-        $this->setApiOption(CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-        $aResponse = $this->executeApiRequest();
-
-        if ($this->getApiErrorCode()) {
-            $this->logApiError($this->getApiError());
-            return ['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API'];
-        }
-
-        return json_decode($aResponse,true);
+        $oCurlHelper = $this->getCurlHelper();
+        return $oCurlHelper->executeApiPostRequest(Registry::getConfig()->getConfigParam('fcfatpayApiUrl'), $this->getFatPayParams($dAmount, $oOrder));;
     }
 
     /**
@@ -60,27 +43,15 @@ class ApiRequest
      */
     public function getApiGetResponse($sTransactionId)
     {
-        $sApiUrl = Registry::getConfig()->getConfigParam('fcfatpayApiUrl');
-        $this->ch = $this->getApi($sApiUrl.'?transaction='.$sTransactionId);
+        $oCurlHelper = $this->getCurlHelper();
+        $sApiUrl =  Registry::getConfig()->getConfigParam('fcfatpayApiUrl').'?transaction='.$sTransactionId;
 
-        if (!$this->ch) {
-            return json_encode(['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API']);
-        }
-
-        $this->setApiOption( CURLOPT_RETURNTRANSFER, true);
-        $aResponse = $this->executeApiRequest();
-
-        if ($this->getApiErrorCode()) {
-            $this->logApiError($this->getApiError());
-            return json_encode(['status' => 'ERROR', 'errormessage' => 'COULDNT_CONNECT_TO_API']);
-        }
-
-        return $aResponse;
+        return $oCurlHelper->executeApiGetRequest($sApiUrl);
     }
 
-    public function logApiError($sError)
+    public function getCurlHelper()
     {
-        Registry::getLogger()->error('FatPay curl error: '.$sError);
+        return new CurlHelper();
     }
 
     /**
@@ -129,58 +100,11 @@ class ApiRequest
     }
 
     /**
-     * Returns cURL handle
-     *
-     * @return false|CurlHandle
-     */
-    public function getApi($sApiUrl)
-    {
-        return curl_init($sApiUrl);
-    }
-
-    /**
-     * Sets cURL option
-     *
-     * @param $sName
-     * @param $value
-     * @return void
-     */
-    public function setApiOption($sName, $value)
-    {
-        curl_setopt($this->ch, $sName, $value);
-    }
-
-    /**
-     * Executes cURL request
-     *
-     * @return bool|string
-     */
-    public function executeApiRequest()
-    {
-        return curl_exec($this->ch);
-    }
-
-    /**
-     * Returns cURL error code
-     *
-     * @return int
-     */
-    public function getApiErrorCode()
-    {
-        return curl_errno($this->ch);
-    }
-
-    public function getApiError()
-    {
-        return curl_error($this->ch);
-    }
-
-    /**
      * Returns order data as array
      *
      * @param $dAmount
      * @param $oOrder
-     * @return array
+     * @return false|string
      * @throws \Psr\Container\ContainerExceptionInterface
      * @throws \Psr\Container\NotFoundExceptionInterface
      */
@@ -229,7 +153,7 @@ class ApiRequest
         $aReturn['payment_type'] = $oOrder->oxorder__oxpaymenttype->value;
         $aReturn['redirectUrl'] = $this->fcGetReturnUrl();
 
-        return $aReturn;
+        return json_encode($aReturn);
     }
 
     /**

@@ -4,13 +4,28 @@ namespace Fatchip\FATPay\Api;
 
 class FatpayApi
 {
-    public $sServer = 'mysql.localhost';
-    public $sUser = 'root';
-    public $sPassword = 'dockerroot';
-    public $sDb = 'fatpay';
-    public $sTable = 'transactions';
+    protected $sServer = 'mysql.localhost';
+    protected $sUser = 'root';
+    protected $sPassword = 'dockerroot';
+    protected $sDb = 'fatpay';
+    protected $sTable = 'transactions';
 
-    public $sRedirectUrl = 'http://localhost/modules/fc/fatpay/Api/fatredirect.php';
+    protected $sRedirectUrl = 'http://localhost/modules/fc/fatpay/Api/fatredirect.php';
+
+    public function __get($sName)
+    {
+        if (isset($this->$sName)) {
+            return $this->$sName;
+        }
+        return null;
+    }
+
+    public function __set($sName, $value)
+    {
+        if (isset($this->$sName)) {
+            $this->$sName = $value;
+        }
+    }
 
     /**
      * Echoes transaction status via given id
@@ -29,11 +44,14 @@ class FatpayApi
             $aRow = $oResult->fetch_row();
 
             if (!empty($aRow[0])) {
-                $this->terminate(json_encode(['status' => $aRow[0]]));
+                echo json_encode(['status' => $aRow[0]]);
+            } else {
+                echo 'TRANSACTION_ID_NOT_FOUND';
             }
-            $this->terminate('TRANSACTION_ID_NOT_FOUND');
+
+        } else {
+            echo 'NO_TRANSACTION_ID_GIVEN';
         }
-        $this->terminate('NO_TRANSACTION_ID_GIVEN');
     }
 
     /**
@@ -55,8 +73,7 @@ class FatpayApi
             //setting status REDIRECT when paying with fatredirect
             $aStatus['status'] = 'REDIRECT';
             $sPaymentStatus = 'PENDING';
-            $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl']);
-            $aStatus['transactionId'] = $sTransactionId;
+            $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl'], $sTransactionId);
 
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             //setting status ERROR when lastname is 'failed'
@@ -96,16 +113,6 @@ class FatpayApi
     }
 
     /**
-     * Calls die(), used for testing
-     *
-     * @param $sMessage
-     * @return void
-     */
-    public function terminate($sMessage){
-        die($sMessage);
-    }
-
-    /**
      * Returns mysqli connection object
      *
      * @param $sServer
@@ -126,11 +133,12 @@ class FatpayApi
      * Returns fatredirect url with return url as get parameter
      *
      * @param $sReturnUrl
+     * @param $sTransactionId
      * @return string
      */
-    public function getRedirectUrl($sReturnUrl)
+    public function getRedirectUrl($sReturnUrl, $sTransactionId)
     {
-        return $this->sRedirectUrl.'?redirectUrl='.urlencode($sReturnUrl);
+        return $this->sRedirectUrl.'?redirectUrl='.urlencode($sReturnUrl).'&transaction='.$sTransactionId;
     }
 
     /**
