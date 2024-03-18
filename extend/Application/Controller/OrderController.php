@@ -29,7 +29,7 @@ class OrderController extends OrderController_parent
     {
         $sPaymentId = $this->getPayment()->getId();
 
-        if ($this->isFatRedirect($sPaymentId)) {
+        if (FatPayHelper::isFatRedirect($sPaymentId)) {
             Registry::getSession()->deleteVariable('fatRedirected');
 
             $oOrder = $this->fcGetCurrentOrder();

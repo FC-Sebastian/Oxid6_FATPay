@@ -21,7 +21,7 @@ class PaymentGateway extends PaymentGateway_parent
     {
         $blReturn = parent::executePayment($dAmount, $oOrder);
 
-        if ($this->isFatPayPayment($oOrder->oxorder__oxpaymenttype->value)) {
+        if (FatPayHelper::isFatPayPayment($oOrder->oxorder__oxpaymenttype->value)) {
             $oOrder->fcSetOrderNumber();
             $aResponse = $this->fcGetApiResponse($dAmount, $oOrder);
 

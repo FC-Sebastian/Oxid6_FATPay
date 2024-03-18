@@ -77,7 +77,7 @@ class Order extends Order_parent
      */
     protected function _setOrderStatus($sStatus)
     {
-        if ($this->isFatRedirect($this->oxorder__oxpaymenttype->value) && $this->oxorder__oxtransstatus->value == "NOT_FINISHED" && $this->blFcFinalizeRedirect === false) {
+        if (FatPayHelper::isFatRedirect($this->oxorder__oxpaymenttype->value) && $this->oxorder__oxtransstatus->value == "NOT_FINISHED" && $this->blFcFinalizeRedirect === false) {
             return;
         }
         parent::_setOrderStatus($sStatus);

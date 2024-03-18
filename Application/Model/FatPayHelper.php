@@ -2,15 +2,15 @@
 
 namespace Fatchip\FATPay\Application\Model;
 
-trait FatPayHelper
+class FatPayHelper
 {
-    protected $aFatpayPayments = [
+    const aFatpayPayments = [
         ['id' => 'fatpay', 'desc' => 'FATPay', 'toAmount' => 1000000],
         ['id' => 'fatredirect', 'desc' => 'FATRedirect', 'toAmount' => 1000000]
     ];
 
-    public function isFatPayPayment($sPayment) {
-        foreach ($this->aFatpayPayments as $aFatpayPayment) {
+    public static function isFatPayPayment($sPayment) {
+        foreach (self::aFatpayPayments as $aFatpayPayment) {
             if ($aFatpayPayment['id'] === $sPayment) {
                 return true;
             }
@@ -18,7 +18,7 @@ trait FatPayHelper
         return false;
     }
 
-    public function isFatRedirect($sPayment) {
-        return $sPayment === $this->aFatpayPayments[1]['id'];
+    public static function isFatRedirect($sPayment) {
+        return $sPayment === self::aFatpayPayments[1]['id'];
     }
 }
