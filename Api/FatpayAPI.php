@@ -74,6 +74,7 @@ class FatpayApi
             $aStatus['status'] = 'REDIRECT';
             $sPaymentStatus = 'PENDING';
             $aStatus['redirectUrl'] = $this->getRedirectUrl($aData['redirectUrl'], $sTransactionId);
+            $aStatus['transactionId'] = $sTransactionId;
 
         } else if (strtolower($aData['billing_lastname']) == 'failed' || strtolower($aData['shipping_lastname']) == 'failed') {
             //setting status ERROR when lastname is 'failed'
